@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>using-env-github-activity | Landing Page</title>
+    <meta name="description" content="Landing page técnica para explicar la estrategia de ramas por ambientes y HU en el repositorio using-env-github-activity.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="hero" id="inicio">
+        <div class="hero__content container">
+            <div class="hero__text">
+                <p class="eyebrow">Repositorio</p>
+                <h1>using-env-github-activity</h1>
+                <p class="lead">
+                    Estrategia de trabajo por ambientes <strong>develop</strong>, <strong>qa</strong> y <strong>main</strong>,
+                    basada en <strong>HU</strong>, ramas hijas por ambiente y Merge Requests controladas.
+                </p>
+                <div class="hero__actions">
+                    <a href="#estructura" class="btn btn--primary">Ver estructura</a>
+                    <a href="#flujo" class="btn btn--secondary">Ver flujo HU</a>
+                </div>
+            </div>
+            <div class="hero__visual card">
+                <img src="assets/branch-strategy.svg" alt="Diagrama de estrategia de ramas por ambientes y HU">
+            </div>
+        </div>
+    </header>
+
+    <nav class="topnav">
+        <div class="container topnav__inner">
+            <a href="#inicio">Inicio</a>
+            <a href="#estructura">Estructura</a>
+            <a href="#reglas">Reglas</a>
+            <a href="#flujo">Flujo HU</a>
+            <a href="#comandos">Comandos</a>
+            <a href="#errores">Errores comunes</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="section" id="estructura">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="eyebrow">Estructura esperada</p>
+                    <h2>¿Qué debe explicar este landing page?</h2>
+                    <p>
+                        Este landing presenta el propósito del repositorio, la política de ambientes, la regla de no tocar ramas padre,
+                        el manejo de cambios mediante HU y el patrón correcto de ramas hijas por ambiente.
+                    </p>
+                </div>
+
+                <div class="grid grid--3">
+                    <article class="card feature-card">
+                        <h3>1. Contexto del repositorio</h3>
+                        <p>
+                            El repositorio trabaja con ambientes separados y una estrategia disciplinada de promoción de cambios.
+                        </p>
+                        <ul>
+                            <li>Repo: <code>using-env-github-activity</code></li>
+                            <li>Ambientes: <code>develop</code>, <code>qa</code>, <code>main</code></li>
+                            <li>Cambios planificados por HU</li>
+                        </ul>
+                    </article>
+
+                    <article class="card feature-card">
+                        <h3>2. Regla central</h3>
+                        <p>
+                            Las ramas padre nunca se modifican directamente. Todo cambio debe entrar por una rama hija controlada.
+                        </p>
+                        <ul>
+                            <li>No commits directos a ramas padre</li>
+                            <li>No Merge Requests cruzadas entre padres</li>
+                            <li>Solo ramas hijas HU-env → rama padre correspondiente</li>
+                        </ul>
+                    </article>
+
+                    <article class="card feature-card">
+                        <h3>3. Evidencia operativa</h3>
+                        <p>
+                            Cada ambiente recibe una HU derivada de su propia rama padre, respetando el alcance planificado.
+                        </p>
+                        <ul>
+                            <li><code>HU-01-develop</code> → <code>develop</code></li>
+                            <li><code>HU-01-qa</code> → <code>qa</code></li>
+                            <li><code>HU-01-main</code> → <code>main</code></li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--alt" id="reglas">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="eyebrow">Reglas del flujo</p>
+                    <h2>Política de trabajo por ambientes</h2>
+                </div>
+
+                <div class="grid grid--3">
+                    <article class="card policy-card policy-card--develop">
+                        <span class="badge">develop</span>
+                        <h3>Desarrollo</h3>
+                        <p>Ambiente de construcción y ajuste. Aquí pueden existir errores, cambios frecuentes y validaciones iniciales.</p>
+                    </article>
+
+                    <article class="card policy-card policy-card--qa">
+                        <span class="badge">qa</span>
+                        <h3>Calidad</h3>
+                        <p>Recibe cambios cuando el desarrollo de la HU ya culminó y se requiere validar el comportamiento esperado.</p>
+                    </article>
+
+                    <article class="card policy-card policy-card--main">
+                        <span class="badge">main</span>
+                        <h3>Producción</h3>
+                        <p>Únicamente recibe cambios probados. Debe mantenerse estable y libre de trabajo en curso no verificado.</p>
+                    </article>
+                </div>
+
+                <div class="card rules-block">
+                    <h3>Reglas obligatorias</h3>
+                    <div class="rules-grid">
+                        <div>
+                            <h4>Se debe hacer</h4>
+                            <ul>
+                                <li>Planificar cambios mediante HU.</li>
+                                <li>Derivar cada HU desde la rama padre correcta.</li>
+                                <li>Crear Merge Request solo de la rama hija a su padre directo.</li>
+                                <li>Conservar la trazabilidad por ambiente.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>No se debe hacer</h4>
+                            <ul>
+                                <li>No tocar directamente <code>develop</code>, <code>qa</code> o <code>main</code>.</li>
+                                <li>No mezclar cambios entre ambientes padre.</li>
+                                <li>No abrir MR de <code>develop</code> hacia <code>qa</code> o de <code>qa</code> hacia <code>main</code>.</li>
+                                <li>No usar una sola rama hija para todos los ambientes.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="flujo">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="eyebrow">Flujo HU</p>
+                    <h2>Patrón correcto de derivación por ambiente</h2>
+                    <p>
+                        Una HU no modifica ramas padre de forma directa. Se crean ramas hijas por ambiente y cada una abre su propia MR
+                        únicamente contra su rama padre correspondiente.
+                    </p>
+                </div>
+
+                <div class="card diagram-card">
+                    <img src="assets/hu-workflow.svg" alt="Flujo de trabajo por HU y ambientes">
+                </div>
+
+                <div class="card scope-card">
+                    <h3>Ejemplo de alcance de una HU</h3>
+                    <p>
+                        Si la <strong>HU-01</strong> tiene como propósito crear la base de datos <code>test-security</code>, entonces el alcance
+                        de la HU se limita al DDL necesario para ese objetivo. No se deben mezclar cambios ajenos al alcance definido.
+                    </p>
+<pre><code>-- Eliminar base de datos
+DROP DATABASE IF EXISTS test-security;
+
+-- Usar base de datos
+USE test-security;
+
+-- Crear base de datos
+CREATE DATABASE test-security;</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--alt" id="comandos">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="eyebrow">Comandos</p>
+                    <h2>Secuencia por ambiente</h2>
+                    <p>
+                        Use los botones para cambiar entre el flujo de comandos de cada ambiente. Cada bloque representa una rama hija distinta.
+                    </p>
+                </div>
+
+                <div class="tabs">
+                    <div class="tabs__controls" role="tablist" aria-label="Ambientes">
+                        <button class="tab-btn is-active" data-tab="develop" role="tab" aria-selected="true">develop</button>
+                        <button class="tab-btn" data-tab="qa" role="tab" aria-selected="false">qa</button>
+                        <button class="tab-btn" data-tab="main" role="tab" aria-selected="false">main</button>
+                    </div>
+
+                    <div class="tab-panel is-active" id="tab-develop" role="tabpanel">
+                        <div class="card command-card">
+                            <h3>HU-01 para develop</h3>
+<pre><code>git switch develop
+git switch -c HU-01-develop
+git pull origin HU-01-develop
+# Crear MR de HU-01-develop hacia develop</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="tab-qa" role="tabpanel">
+                        <div class="card command-card">
+                            <h3>HU-01 para qa</h3>
+<pre><code>git switch qa
+git switch -c HU-01-qa
+git pull origin HU-01-qa
+# Crear MR de HU-01-qa hacia qa</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="tab-main" role="tabpanel">
+                        <div class="card command-card">
+                            <h3>HU-01 para main</h3>
+<pre><code>git switch main
+git switch -c HU-01-main
+git pull origin HU-01-main
+# Crear MR de HU-01-main hacia main</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="errores">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="eyebrow">Control de errores</p>
+                    <h2>Qué se debe evitar</h2>
+                </div>
+
+                <div class="grid grid--2">
+                    <article class="card error-card">
+                        <h3>Antipatrón 1</h3>
+                        <p class="error-title">Commit directo a ramas padre</p>
+                        <p>
+                            Rompe la trazabilidad, omite revisión formal y aumenta el riesgo de inconsistencia entre ambientes.
+                        </p>
+                    </article>
+
+                    <article class="card error-card">
+                        <h3>Antipatrón 2</h3>
+                        <p class="error-title">Cruzar Merge Requests entre ramas padre</p>
+                        <p>
+                            Genera contaminación entre ambientes. La promoción correcta es rehacer la HU en su rama hija respectiva por ambiente.
+                        </p>
+                    </article>
+
+                    <article class="card error-card">
+                        <h3>Antipatrón 3</h3>
+                        <p class="error-title">Una sola rama hija para todo</p>
+                        <p>
+                            Pierde aislamiento por ambiente y dificulta la validación disciplinada de cada promoción.
+                        </p>
+                    </article>
+
+                    <article class="card error-card">
+                        <h3>Antipatrón 4</h3>
+                        <p class="error-title">HU sin alcance claro</p>
+                        <p>
+                            Una HU debe tener propósito definido. No se deben mezclar cambios funcionales, estructurales o correctivos no relacionados.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--accent" id="resumen">
+            <div class="container">
+                <div class="summary-box">
+                    <p class="eyebrow">Conclusión operativa</p>
+                    <h2>La regla es simple</h2>
+                    <p>
+                        <strong>Las ramas padre no se tocan.</strong> Cada cambio nace como una HU, se deriva a una rama hija específica por ambiente,
+                        y solo entra a <code>develop</code>, <code>qa</code> o <code>main</code> mediante su Merge Request correspondiente.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer__inner">
+            <p>Landing técnico — using-env-github-activity</p>
+            <p>HTML, CSS y JS separados para apertura local directa.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

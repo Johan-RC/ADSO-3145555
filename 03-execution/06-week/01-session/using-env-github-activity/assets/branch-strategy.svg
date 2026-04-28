@@ -1,0 +1,45 @@
+<svg width="1200" height="820" viewBox="0 0 1200 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="820" rx="36" fill="#0A1020"/>
+  <rect x="60" y="60" width="1080" height="700" rx="28" fill="#101A35" stroke="#243459"/>
+  <text x="100" y="120" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="36" font-weight="700">Estrategia por ambientes y ramas hijas</text>
+  <text x="100" y="160" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="20">Nunca se toca una rama padre de manera directa. Cada HU se deriva por ambiente y se integra mediante MR.</text>
+
+  <rect x="110" y="230" width="260" height="130" rx="22" fill="#172645" stroke="#6EA8FE" stroke-width="2"/>
+  <text x="145" y="280" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="18" font-weight="700">Rama padre</text>
+  <text x="145" y="322" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="34" font-weight="700">develop</text>
+
+  <rect x="470" y="230" width="260" height="130" rx="22" fill="#172645" stroke="#8EF0C2" stroke-width="2"/>
+  <text x="505" y="280" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="18" font-weight="700">Rama padre</text>
+  <text x="505" y="322" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="34" font-weight="700">qa</text>
+
+  <rect x="830" y="230" width="260" height="130" rx="22" fill="#172645" stroke="#FFD580" stroke-width="2"/>
+  <text x="865" y="280" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="18" font-weight="700">Rama padre</text>
+  <text x="865" y="322" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="34" font-weight="700">main</text>
+
+  <rect x="110" y="470" width="260" height="150" rx="22" fill="#1B2B4F" stroke="#6EA8FE" stroke-dasharray="8 8" stroke-width="2"/>
+  <text x="145" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">HU-01-develop</text>
+  <text x="145" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="20">MR solo hacia develop</text>
+
+  <rect x="470" y="470" width="260" height="150" rx="22" fill="#1B2B4F" stroke="#8EF0C2" stroke-dasharray="8 8" stroke-width="2"/>
+  <text x="515" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">HU-01-qa</text>
+  <text x="515" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="20">MR solo hacia qa</text>
+
+  <rect x="830" y="470" width="260" height="150" rx="22" fill="#1B2B4F" stroke="#FFD580" stroke-dasharray="8 8" stroke-width="2"/>
+  <text x="865" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">HU-01-main</text>
+  <text x="865" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="20">MR solo hacia main</text>
+
+  <path d="M240 470V360" stroke="#6EA8FE" stroke-width="4"/>
+  <path d="M600 470V360" stroke="#8EF0C2" stroke-width="4"/>
+  <path d="M960 470V360" stroke="#FFD580" stroke-width="4"/>
+  <path d="M230 375L240 355L250 375" stroke="#6EA8FE" stroke-width="4" fill="none"/>
+  <path d="M590 375L600 355L610 375" stroke="#8EF0C2" stroke-width="4" fill="none"/>
+  <path d="M950 375L960 355L970 375" stroke="#FFD580" stroke-width="4" fill="none"/>
+
+  <line x1="370" y1="295" x2="470" y2="295" stroke="#FF9B9B" stroke-width="4" stroke-dasharray="12 10"/>
+  <line x1="730" y1="295" x2="830" y2="295" stroke="#FF9B9B" stroke-width="4" stroke-dasharray="12 10"/>
+  <text x="380" y="270" fill="#FF9B9B" font-family="Arial, sans-serif" font-size="18" font-weight="700">No MR cruzadas</text>
+  <text x="738" y="270" fill="#FF9B9B" font-family="Arial, sans-serif" font-size="18" font-weight="700">No MR cruzadas</text>
+
+  <rect x="95" y="680" width="1010" height="50" rx="16" fill="#0E162B" stroke="#243459"/>
+  <text x="130" y="712" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="22">Regla: HU-env → rama padre correspondiente. Nunca: develop → qa, qa → main, ni commits directos sobre ramas padre.</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg width="1400" height="880" viewBox="0 0 1400 880" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="880" rx="34" fill="#0A1020"/>
+  <text x="90" y="90" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="38" font-weight="700">Flujo operativo por Historia de Usuario</text>
+  <text x="90" y="130" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="22">Cada ambiente se atiende con su propia rama hija, su propio alcance y su propia Merge Request.</text>
+
+  <rect x="90" y="210" width="280" height="130" rx="24" fill="#14213E" stroke="#8EF0C2" stroke-width="2"/>
+  <text x="120" y="260" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="20" font-weight="700">Paso 1</text>
+  <text x="120" y="300" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="30" font-weight="700">Definir HU</text>
+  <text x="120" y="328" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">Ej.: crear test-security</text>
+
+  <rect x="480" y="210" width="420" height="130" rx="24" fill="#14213E" stroke="#6EA8FE" stroke-width="2"/>
+  <text x="510" y="260" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="20" font-weight="700">Paso 2</text>
+  <text x="510" y="300" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="30" font-weight="700">Derivar rama hija por ambiente</text>
+  <text x="510" y="328" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">HU-01-develop / HU-01-qa / HU-01-main</text>
+
+  <rect x="1010" y="210" width="300" height="130" rx="24" fill="#14213E" stroke="#FFD580" stroke-width="2"/>
+  <text x="1040" y="260" fill="#8EF0C2" font-family="Arial, sans-serif" font-size="20" font-weight="700">Paso 3</text>
+  <text x="1040" y="300" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="30" font-weight="700">Implementar</text>
+  <text x="1040" y="328" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">Solo dentro del alcance</text>
+
+  <path d="M370 275H480" stroke="#6EA8FE" stroke-width="4"/>
+  <path d="M900 275H1010" stroke="#6EA8FE" stroke-width="4"/>
+
+  <rect x="120" y="470" width="280" height="170" rx="24" fill="#192B4D" stroke="#6EA8FE" stroke-width="2"/>
+  <text x="150" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">develop</text>
+  <text x="150" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch develop</text>
+  <text x="150" y="588" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch -c HU-01-develop</text>
+  <text x="150" y="616" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">MR: HU-01-develop → develop</text>
+
+  <rect x="560" y="470" width="280" height="170" rx="24" fill="#192B4D" stroke="#8EF0C2" stroke-width="2"/>
+  <text x="590" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">qa</text>
+  <text x="590" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch qa</text>
+  <text x="590" y="588" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch -c HU-01-qa</text>
+  <text x="590" y="616" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">MR: HU-01-qa → qa</text>
+
+  <rect x="1000" y="470" width="280" height="170" rx="24" fill="#192B4D" stroke="#FFD580" stroke-width="2"/>
+  <text x="1030" y="520" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="28" font-weight="700">main</text>
+  <text x="1030" y="560" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch main</text>
+  <text x="1030" y="588" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">git switch -c HU-01-main</text>
+  <text x="1030" y="616" fill="#BCC7DD" font-family="Arial, sans-serif" font-size="18">MR: HU-01-main → main</text>
+
+  <path d="M700 340V430" stroke="#8EF0C2" stroke-width="4" stroke-dasharray="10 10"/>
+  <path d="M260 430V470" stroke="#6EA8FE" stroke-width="4"/>
+  <path d="M700 430V470" stroke="#8EF0C2" stroke-width="4"/>
+  <path d="M1140 430V470" stroke="#FFD580" stroke-width="4"/>
+  <path d="M260 430H1140" stroke="#AAB7D6" stroke-width="2" stroke-dasharray="12 10"/>
+
+  <rect x="90" y="720" width="1220" height="90" rx="20" fill="#0E162B" stroke="#243459"/>
+  <text x="130" y="775" fill="#FF9B9B" font-family="Arial, sans-serif" font-size="24" font-weight="700">Prohibido:</text>
+  <text x="250" y="775" fill="#F5F7FB" font-family="Arial, sans-serif" font-size="24">commits directos a ramas padre, MR cruzadas entre ambientes o una sola rama hija para todos los despliegues.</text>
+</svg>

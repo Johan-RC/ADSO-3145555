@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landing - 5 ejercicios resueltos del modelo de aerolínea</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <p class="eyebrow">Modelo relacional de aerolínea</p>
+      <h1>5 ejercicios resueltos con teoría, scripts y justificación técnica</h1>
+      <p class="hero__text">
+        Este landing explica por qué se eligió cada solución, cómo se conectan los dominios y cuál es la secuencia correcta para ejecutar
+        consultas, triggers, procedimientos almacenados y scripts de demostración.
+      </p>
+      <div class="hero__actions">
+        <a class="button" href="../README.md">Ver README</a>
+        <a class="button button--secondary" href="#teoria">Ir a la teoría</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <nav>
+        <a href="#modelo">Modelo</a>
+        <a href="#teoria">Teoría base</a>
+        <a href="#flujo">Flujo recomendado</a>
+        <a href="#ej11">Ejercicio 11</a>
+        <a href="#ej12">Ejercicio 12</a>
+        <a href="#ej13">Ejercicio 13</a>
+        <a href="#ej14">Ejercicio 14</a>
+        <a href="#ej15">Ejercicio 15</a>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <section id="modelo" class="panel">
+        <h2>Resumen del modelo</h2>
+        <p>
+          El modelo está separado por dominios funcionales. Esa separación permite construir soluciones por capas sin modificar el diseño base.
+          Los ejercicios de este paquete se apoyan principalmente en BOARDING, PAYMENT, FLIGHT OPERATIONS, BILLING y SECURITY.
+        </p>
+        <div class="grid">
+          <article class="card">
+            <h3>BOARDING</h3>
+            <p>Check-in, pase de abordar y validación final del pasajero.</p>
+          </article>
+          <article class="card">
+            <h3>PAYMENT</h3>
+            <p>Pagos, transacciones, estados, métodos y devoluciones.</p>
+          </article>
+          <article class="card">
+            <h3>FLIGHT OPERATIONS</h3>
+            <p>Vuelos, segmentos, estados y causas de retraso.</p>
+          </article>
+          <article class="card">
+            <h3>BILLING</h3>
+            <p>Factura, detalle facturable e impuestos aplicables.</p>
+          </article>
+          <article class="card">
+            <h3>SECURITY</h3>
+            <p>Usuarios, roles, permisos y asignaciones.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="teoria" class="panel">
+        <h2>Teoría base</h2>
+        <div class="stack">
+          <article class="card">
+            <h3>1. ¿Por qué usar INNER JOIN?</h3>
+            <p>
+              Se usa cuando se quiere mostrar únicamente información que existe en todas las tablas relacionadas. En estos ejercicios, el objetivo
+              no es listar datos incompletos sino probar trazabilidad real del proceso: reserva → pago → refund, o ticket → check-in → boarding pass.
+            </p>
+          </article>
+          <article class="card">
+            <h3>2. ¿Por qué usar triggers AFTER?</h3>
+            <p>
+              Un trigger AFTER se ejecuta cuando la fila principal ya fue insertada. Eso es clave cuando la tabla dependiente necesita la PK o la FK
+              recién creada. Por eso en el ejercicio 11 el boarding pass depende de que el check-in ya exista.
+            </p>
+          </article>
+          <article class="card">
+            <h3>3. ¿Por qué usar procedimientos almacenados?</h3>
+            <p>
+              El procedimiento encapsula la regla de negocio. Así, la aplicación no repite lógica en muchos puntos y la validación queda centralizada.
+              En este paquete, cada procedimiento hace una sola tarea concreta y deja al trigger la reacción posterior.
+            </p>
+          </article>
+          <article class="card">
+            <h3>4. ¿Qué demuestra el script demo?</h3>
+            <p>
+              Demuestra el flujo completo. No solo crea objetos, sino que los usa. Cada demo selecciona identificadores reales del modelo, ejecuta
+              el procedimiento y luego consulta el resultado para validar que el trigger sí se disparó.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="flujo" class="panel">
+        <h2>Flujo recomendado de trabajo</h2>
+        <ol class="steps">
+          <li>Leer el Markdown del ejercicio para entender el problema y la justificación técnica.</li>
+          <li>Ejecutar el archivo <code>setup.sql</code> para crear trigger, función y procedimiento.</li>
+          <li>Revisar la consulta resuelta y entender qué aporta cada tabla al resultado.</li>
+          <li>Ejecutar el archivo <code>demo.sql</code> para disparar el procedimiento.</li>
+          <li>Verificar la evidencia final con la consulta de validación incluida en el demo.</li>
+        </ol>
+      </section>
+
+      <section id="ej11" class="panel">
+        <h2>Ejercicio 11 - Check-in y boarding pass</h2>
+        <p class="badge">BOARDING + SALES + FLIGHT OPERATIONS</p>
+        <p>
+          Aquí la solución se diseñó para automatizar un paso operativo natural: cuando el pasajero hace check-in, el pase de abordar debe quedar
+          generado. El trigger AFTER se eligió porque <code>boarding_pass.check_in_id</code> depende directamente del nuevo <code>check_in</code>.
+        </p>
+        <details>
+          <summary>Ver explicación paso a paso</summary>
+          <ul>
+            <li>La consulta consolida reserva, pasajero, ticket, segmento, vuelo, check-in y boarding pass.</li>
+            <li>El procedimiento inserta el check-in y previene duplicados por ticket_segment.</li>
+            <li>El trigger genera el boarding pass con un código derivado del check_in_id.</li>
+            <li>La validación final prueba que ambos registros quedaron conectados.</li>
+          </ul>
+          <p><a href="../ejercicios_resueltos/ejercicio_11_resuelto.md">Abrir Markdown</a> · <a href="../scripts_sql/ejercicio_11_setup.sql">Setup SQL</a> · <a href="../scripts_sql/ejercicio_11_demo.sql">Demo SQL</a></p>
+        </details>
+      </section>
+
+      <section id="ej12" class="panel">
+        <h2>Ejercicio 12 - Refund y transacción financiera</h2>
+        <p class="badge">PAYMENT + SALES + CUSTOMER</p>
+        <p>
+          El objetivo fue garantizar consistencia entre <code>refund</code> y <code>payment_transaction</code>. Se eligió que el hecho principal sea
+          el refund; luego, el trigger crea la evidencia financiera de tipo REFUND.
+        </p>
+        <details>
+          <summary>Ver explicación paso a paso</summary>
+          <ul>
+            <li>La consulta une reserva, cliente, venta, pago, estado, método y transacción.</li>
+            <li>El procedimiento valida el monto antes de registrar la devolución.</li>
+            <li>El trigger crea una transacción financiera derivada con referencia única.</li>
+            <li>La prueba muestra refund y payment_transaction en una misma ejecución.</li>
+          </ul>
+          <p><a href="../ejercicios_resueltos/ejercicio_12_resuelto.md">Abrir Markdown</a> · <a href="../scripts_sql/ejercicio_12_setup.sql">Setup SQL</a> · <a href="../scripts_sql/ejercicio_12_demo.sql">Demo SQL</a></p>
+        </details>
+      </section>
+
+      <section id="ej13" class="panel">
+        <h2>Ejercicio 13 - Retraso operativo de un segmento</h2>
+        <p class="badge">FLIGHT OPERATIONS + AIRLINE + AIRPORT</p>
+        <p>
+          El diseño se enfocó en <code>flight_delay</code> como evento principal. El trigger no crea una tabla adicional; actualiza el vuelo padre
+          para dejar evidencia temporal del impacto operativo.
+        </p>
+        <details>
+          <summary>Ver explicación paso a paso</summary>
+          <ul>
+            <li>La consulta combina retraso, causa, segmento, vuelo, aerolínea y ruta.</li>
+            <li>El procedimiento valida que los minutos sean mayores que cero.</li>
+            <li>El trigger toca <code>flight.updated_at</code> cuando se inserta un retraso.</li>
+            <li>La validación final demuestra el evento y el efecto sobre el vuelo.</li>
+          </ul>
+          <p><a href="../ejercicios_resueltos/ejercicio_13_resuelto.md">Abrir Markdown</a> · <a href="../scripts_sql/ejercicio_13_setup.sql">Setup SQL</a> · <a href="../scripts_sql/ejercicio_13_demo.sql">Demo SQL</a></p>
+        </details>
+      </section>
+
+      <section id="ej14" class="panel">
+        <h2>Ejercicio 14 - Línea de factura controlada</h2>
+        <p class="badge">BILLING + SALES + CUSTOMER</p>
+        <p>
+          En este caso, el reto era calcular el número de línea sin tocar la estructura. La solución usa un procedimiento que obtiene el siguiente
+          <code>line_number</code> y un trigger que actualiza la fecha de modificación de la factura.
+        </p>
+        <details>
+          <summary>Ver explicación paso a paso</summary>
+          <ul>
+            <li>La consulta une invoice_line, invoice, sale, reservation, customer y person.</li>
+            <li>El procedimiento calcula el siguiente número disponible dentro de la factura.</li>
+            <li>El trigger actualiza <code>invoice.updated_at</code> cuando entra una nueva línea.</li>
+            <li>La validación final muestra la línea nueva y el cambio temporal del encabezado.</li>
+          </ul>
+          <p><a href="../ejercicios_resueltos/ejercicio_14_resuelto.md">Abrir Markdown</a> · <a href="../scripts_sql/ejercicio_14_setup.sql">Setup SQL</a> · <a href="../scripts_sql/ejercicio_14_demo.sql">Demo SQL</a></p>
+        </details>
+      </section>
+
+      <section id="ej15" class="panel">
+        <h2>Ejercicio 15 - Asignación de roles</h2>
+        <p class="badge">SECURITY + IDENTITY</p>
+        <p>
+          La asignación de roles cambia el perfil operativo del usuario. Por eso se eligió un procedimiento que evita duplicados y un trigger que
+          actualiza la cuenta cuando recibe un nuevo rol.
+        </p>
+        <details>
+          <summary>Ver explicación paso a paso</summary>
+          <ul>
+            <li>La consulta une usuario, persona, estado, rol y permisos.</li>
+            <li>El procedimiento revisa si la asignación ya existe.</li>
+            <li>El trigger actualiza <code>user_account.updated_at</code> tras insertar en <code>user_role</code>.</li>
+            <li>La validación final muestra el rol asignado y la actualización del usuario.</li>
+          </ul>
+          <p><a href="../ejercicios_resueltos/ejercicio_15_resuelto.md">Abrir Markdown</a> · <a href="../scripts_sql/ejercicio_15_setup.sql">Setup SQL</a> · <a href="../scripts_sql/ejercicio_15_demo.sql">Demo SQL</a></p>
+        </details>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
