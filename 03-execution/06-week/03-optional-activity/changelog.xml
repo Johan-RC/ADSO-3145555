@@ -1,0 +1,21 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="1" author="Johan">
+    <!-- CREAR EL CAMBIO QUE SE VA REFLEJAR EN LA DB -->
+    <createTable tableName="cliente"> <!-- NOMBRE DE LA ENTIDAD -->
+
+      <!-- PRIMERA COLUMNA ID -->
+      <column name="id" type="INT" autoIncrement="true"> <!-- ID IDENTIFICADOR DE LA PRIMERA COLUMNA -->
+        <constraints primaryKey="true"/> <!-- Es la clave primaria (ID unico de cada fila) -->
+      </column>
+      <!-- SEGUNDA COLUMNA NOMBRE -->
+      <column name="nombre_cliente" type="VARCHAR(255)"/> <!-- LA SEGUNDA COLUMNA QUE ES NOMBRE CON SU TIPO DE DATO -->
+      <column name="apellido_cliente" type="VARCHAR(255)"/> <!-- LA TERCERA COLUMNA QUE ES APELLIDO CON SU TIPO DE DATO -->
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>s

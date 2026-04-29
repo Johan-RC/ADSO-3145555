@@ -1,0 +1,2 @@
+-- Este ejercicio no requiere objetos adicionales.
+-- Usa las tablas clientes, pedidos, detalle_pedido y productos creadas en ejercicios anteriores.

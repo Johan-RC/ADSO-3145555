@@ -1,0 +1,43 @@
+erDiagram
+    TYPE_DOCUMENT
+    PERSON
+    FILE
+    ROLE
+    MODULE
+    APP_VIEW
+    APP_USER
+    USER_ROLE
+    ROLE_MODULE
+    MODULE_VIEW
+    CATEGORY
+    SUPPLIER
+    PRODUCT
+    INVENTORY
+    CUSTOMER
+    METHOD_PAYMENT
+    SALES_ORDER
+    ORDER_ITEM
+    INVOICE
+    INVOICE_ITEM
+    PAYMENT
+
+    PERSON ||--o| APP_USER : representa
+    ROLE ||--o{ USER_ROLE : asigna
+    APP_USER ||--o{ USER_ROLE : recibe
+    ROLE ||--o{ ROLE_MODULE : habilita
+    MODULE ||--o{ ROLE_MODULE : agrupa
+    MODULE ||--o{ MODULE_VIEW : contiene
+    APP_VIEW ||--o{ MODULE_VIEW : muestra
+    CATEGORY ||--o{ PRODUCT : agrupa
+    SUPPLIER ||--o{ PRODUCT : abastece
+    PRODUCT ||--o| INVENTORY : controla
+    CUSTOMER ||--o{ SALES_ORDER : realiza
+    APP_USER ||--o{ SALES_ORDER : gestiona
+    SALES_ORDER ||--o{ ORDER_ITEM : incluye
+    PRODUCT ||--o{ ORDER_ITEM : compone
+    SALES_ORDER ||--o| INVOICE : genera
+    CUSTOMER ||--o{ INVOICE : recibe
+    INVOICE ||--o{ INVOICE_ITEM : detalla
+    PRODUCT ||--o{ INVOICE_ITEM : lista
+    METHOD_PAYMENT ||--o{ PAYMENT : usa
+    INVOICE ||--o{ PAYMENT : paga

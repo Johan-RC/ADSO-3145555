@@ -1,0 +1,338 @@
+erDiagram
+    %% CATALOGS
+    status_catalog {
+        UUID id PK
+        varchar code
+        varchar name
+        varchar description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    media_type_catalog {
+        UUID id PK
+        varchar code
+        varchar name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    severity_catalog {
+        UUID id PK
+        varchar code
+        varchar name
+        int rank
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    event_category_catalog {
+        UUID id PK
+        varchar code
+        varchar name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    %% SECURITY
+    person {
+        UUID id PK
+        varchar first_name
+        varchar last_name
+        varchar phone
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    user {
+        UUID id PK
+        UUID person_id FK
+        varchar email
+        varchar password
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    role {
+        UUID id PK
+        varchar name
+        varchar description
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    permission {
+        UUID id PK
+        varchar name
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    module {
+        UUID id PK
+        varchar name
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    form {
+        UUID id PK
+        varchar name
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    form_module {
+        UUID id PK
+        UUID module_id FK
+        UUID form_id FK
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    role_user {
+        UUID id PK
+        UUID user_id FK
+        UUID role_id FK
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    role_form_permission {
+        UUID id PK
+        UUID role_id FK
+        UUID permission_id FK
+        UUID form_id FK
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    %% DEVICE
+    device {
+        UUID id PK
+        varchar serial_number
+        varchar api_key_hash
+        varchar firmware_version
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    device_assignment {
+        UUID id PK
+        UUID device_id FK
+        UUID user_id FK
+        timestamptz assigned_at
+        timestamptz unassigned_at
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    device_config {
+        UUID id PK
+        UUID device_id FK
+        jsonb config_data
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    %% SYSTEM CATALOG + EVENTS
+    sound_pattern {
+        UUID id PK
+        varchar code
+        varchar description
+        int frequency_hz
+        int duration
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    event_type {
+        UUID id PK
+        varchar code
+        varchar name
+        UUID category_id FK
+        UUID default_severity_id FK
+        UUID default_sound_pattern_id FK
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    event {
+        UUID id PK
+        UUID device_id FK
+        UUID event_type_id FK
+        timestamptz occurred_at
+        boolean is_offline_sync
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    alert {
+        UUID id PK
+        UUID event_id FK
+        UUID sound_pattern_id FK
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    evidence {
+        UUID id PK
+        UUID event_id FK
+        UUID media_type_id FK
+        varchar file_url
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    notification {
+        UUID id PK
+        UUID user_id FK
+        UUID event_id FK
+        varchar title
+        varchar message
+        UUID status_id FK
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+        UUID created_by
+        UUID updated_by
+        UUID deleted_by
+    }
+
+    %% RELATIONSHIPS
+    person ||--|| user : "person_id"
+
+    user ||--o{ role_user : "has roles"
+    role ||--o{ role_user : "assigned to"
+
+    module ||--o{ form_module : "has"
+    form ||--o{ form_module : "has"
+
+    role ||--o{ role_form_permission : "grants"
+    permission ||--o{ role_form_permission : "via"
+    form ||--o{ role_form_permission : "on"
+
+    device ||--o{ device_assignment : "assignment history"
+    user ||--o{ device_assignment : "assignment history"
+
+    device ||--o| device_config : "config"
+
+    sound_pattern ||--o{ event_type : "default_sound_pattern"
+    event_category_catalog ||--o{ event_type : "category"
+    severity_catalog ||--o{ event_type : "default_severity"
+
+    device ||--o{ event : "generates"
+    event_type ||--o{ event : "categorizes"
+
+    event ||--o{ alert : "triggers"
+    sound_pattern ||--o{ alert : "plays"
+
+    event ||--o{ evidence : "has"
+    media_type_catalog ||--o{ evidence : "types"
+
+    user ||--o{ notification : "receives"
+    event ||--o{ notification : "causes"
+
+    status_catalog ||--o{ person : "status"
+    status_catalog ||--o{ user : "status"
+    status_catalog ||--o{ role : "status"
+    status_catalog ||--o{ permission : "status"
+    status_catalog ||--o{ module : "status"
+    status_catalog ||--o{ form : "status"
+    status_catalog ||--o{ form_module : "status"
+    status_catalog ||--o{ role_user : "status"
+    status_catalog ||--o{ role_form_permission : "status"
+    status_catalog ||--o{ device : "status"
+    status_catalog ||--o{ device_assignment : "status"
+    status_catalog ||--o{ device_config : "status"
+    status_catalog ||--o{ sound_pattern : "status"
+    status_catalog ||--o{ event_type : "status"
+    status_catalog ||--o{ event : "status"
+    status_catalog ||--o{ alert : "status"
+    status_catalog ||--o{ evidence : "status"
+    status_catalog ||--o{ notification : "status"
