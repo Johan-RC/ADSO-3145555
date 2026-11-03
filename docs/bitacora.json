@@ -1,0 +1,20 @@
+[
+  {
+    "fecha": "2026-10-30",
+    "ruta": "2026-10-30-2026-10-30-evaluacion-e2e-3145555-seguimiento",
+    "titulo": "Evaluación extremo a extremo – segundo momento (corte 30-oct) y comparación con el 22-oct",
+    "resumen": "Repetición con los mismos criterios de la evaluación del 22-oct sobre los 12 proyectos: puntaje, flujos y hallazgos por equipo, y tabla de avance entre los dos cortes.",
+    "archivos": 13,
+    "autor": "Jesús Ariel González Bonilla",
+    "creado_en": "2026-10-30T14:57:23-05:00"
+  },
+  {
+    "fecha": "2026-10-23",
+    "ruta": "2026-10-23-evaluacion-e2e-3145555",
+    "titulo": "Evaluación extremo a extremo de los 12 proyectos",
+    "resumen": "Revisión estricta de código, datos, seguridad, pruebas y operación de los 12 proyectos, con puntaje por dimensión, flujos de punta a punta, verificación independiente y un informe por equipo. Corte 2026-10-22; integrantes anónimos.",
+    "archivos": 25,
+    "autor": "Jesús Ariel González Bonilla",
+    "creado_en": "2026-10-23T09:04:27-05:00"
+  }
+]

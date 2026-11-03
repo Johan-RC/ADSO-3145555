@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reloj de escenas ADSO 3145555</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Chakra+Petch:wght@400;600;700&family=Anton&display=swap">
+<style>
+/* Reloj de escenas: la jornada tiene fases con su propio color, ritmo y sonido; en el camino aparecen mensajes, preguntas, alertas, suspenso y videos. */
+:root {
+  --fondo: #07070a;
+  --fondo-alto: #1a1a22;
+  --linea: #2c2c35;
+  --texto: #ececf2;
+  --suave: #9d9dab;
+  --led: 141, 146, 156;               /* r, g, b de la fase actual */
+  --f-led: "Orbitron", "Segoe UI", system-ui, monospace;
+  --f-ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--fondo); color: var(--texto); font-family: var(--f-ui); overflow: hidden; }
+
+.reloj[data-fase="espera"]       { --led: 141, 146, 156; }
+.reloj[data-fase="lectura"]      { --led: 56, 189, 248; }
+.reloj[data-fase="construccion"] { --led: 255, 122, 26; }
+.reloj[data-fase="integracion"]  { --led: 250, 204, 21; }
+.reloj[data-fase="cierre"]       { --led: 255, 59, 48; }
+.reloj[data-fase="fin"]          { --led: 255, 59, 48; }
+
+.reloj {
+  position: relative; height: 100%; padding: 2.2vh 3vw 2.6vh;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 1.6vh;
+  text-align: center; user-select: none; overflow: hidden;
+  background: radial-gradient(120% 110% at 50% 0%, rgba(var(--led), .16) 0%, var(--fondo) 62%);
+  transition: background 1.2s;
+}
+.reloj.oculto { cursor: none; }
+
+/* Cabecera */
+.cab { display: flex; justify-content: space-between; align-items: center; gap: 2vw; font-size: clamp(16px, 1.7vw, 44px); color: var(--suave); letter-spacing: .04em; }
+.chip { display: inline-flex; align-items: center; gap: .55em; padding: .25em .9em .25em .6em; border-radius: 99px; color: var(--texto); font-weight: 700;
+  background: rgba(var(--led), .16); border: 1px solid rgba(var(--led), .55); text-transform: uppercase; letter-spacing: .1em; }
+.chip .em { font-size: 1.25em; }
+.titulo { font-weight: 700; color: var(--texto); }
+.hora b { color: var(--texto); font-variant-numeric: tabular-nums; }
+
+/* Dígitos */
+.centro { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 1.2vh; }
+.dig { font-family: var(--f-led); font-weight: 900; line-height: 1; white-space: nowrap; font-size: 12vw; color: rgb(var(--led));
+  text-shadow: 0 0 .1em rgba(var(--led), .85), 0 0 .45em rgba(var(--led), .35); transition: color .8s, text-shadow .8s; }
+.dig span { display: inline-block; width: .86em; text-align: center; }
+.dig span.c { width: .4em; transform: translateY(-.06em); }
+.reloj[data-fase="cierre"] .dig { animation: pulso 1s ease-in-out infinite; }
+.reloj[data-fase="fin"] .dig { animation: parpadeo 1.1s steps(2, start) infinite; }
+.reloj.glitch .dig { animation: glitch .22s steps(2, end) infinite; }
+.sub { font-size: clamp(18px, 2.6vw, 66px); color: var(--suave); }
+.sub b { color: var(--texto); font-weight: 700; }
+.ticker { min-height: 1.5em; font-size: clamp(16px, 2.1vw, 54px); color: var(--texto); font-weight: 600; opacity: 0; transition: opacity .6s; }
+.ticker.on { opacity: 1; }
+
+/* Barra con fases y marcadores */
+.jornada { width: 100%; max-width: 1700px; margin-inline: auto; display: grid; gap: .9vh; }
+.barra { position: relative; height: clamp(10px, 1.2vw, 28px); border-radius: 99px; overflow: hidden; background: var(--fondo-alto); box-shadow: inset 0 1px 2px #000a; }
+.seg { position: absolute; top: 0; bottom: 0; opacity: .28; }
+.relleno { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(var(--led), .5), rgb(var(--led))); box-shadow: 0 0 16px rgba(var(--led), .8); transition: width 1s linear; }
+.marca { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff7; }
+.pie { display: flex; justify-content: space-between; gap: 12px; font-size: clamp(14px, 1.6vw, 38px); color: var(--suave); font-variant-numeric: tabular-nums; }
+
+/* Controles */
+.ctrl { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; transition: opacity .4s; }
+.reloj.oculto .ctrl { opacity: 0; pointer-events: none; }
+button { font: 600 clamp(14px, 1.15vw, 20px) var(--f-ui); color: var(--texto); background: #19191f; border: 1px solid var(--linea); border-radius: 99px; padding: .65em 1.3em; cursor: pointer; }
+button:hover { background: var(--fondo-alto); }
+button:focus-visible { outline: 2px solid rgb(var(--led)); outline-offset: 3px; }
+button.son:not(.on) { border-color: rgba(var(--led), .9); animation: llamado 1.8s ease-in-out infinite; }
+
+/* Emojis que suben */
+.flota { position: absolute; bottom: -12vh; font-size: clamp(28px, 4.2vw, 96px); pointer-events: none; opacity: 0; z-index: 1; animation: sube var(--dur, 9s) linear forwards; filter: drop-shadow(0 0 12px rgba(var(--led), .6)); }
+
+/* Destello */
+.destello { position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 5; background: radial-gradient(ellipse at center, rgba(255, 30, 20, 0) 40%, rgba(255, 30, 20, .55) 100%); }
+
+/* Superposiciones */
+.ov { position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 3vh; padding: 5vh 6vw; text-align: center; }
+.ov.on { display: flex; animation: entra .35s ease-out; }
+.ov .grande { font-size: clamp(60px, 14vw, 340px); line-height: 1; }
+.ov .texto { font-size: clamp(26px, 4.4vw, 120px); font-weight: 700; line-height: 1.12; max-width: 24ch; text-wrap: balance; }
+.ov .etq { font-size: clamp(14px, 1.7vw, 40px); letter-spacing: .24em; text-transform: uppercase; color: var(--suave); }
+.ov[data-tipo="pregunta"] { background: radial-gradient(90% 90% at 50% 40%, #1b1030f2, #08060cf5); }
+.ov[data-tipo="pregunta"] .grande { color: #c084fc; text-shadow: 0 0 .3em #c084fc99; }
+.ov[data-tipo="alerta"] { background: rgba(120, 8, 8, .93); animation: entra .2s ease-out, titila .7s steps(2, start) infinite; }
+.ov[data-tipo="suspenso"] { background: #000; }
+.ov[data-tipo="suspenso"] .grande { animation: ojo 1.6s ease-in-out infinite; }
+.ov[data-tipo="suspenso"] .texto { color: #cfd2da; font-weight: 600; font-size: clamp(22px, 3.4vw, 90px); }
+.ov[data-tipo="mensaje"] { inset: auto 0 11vh 0; background: linear-gradient(0deg, #000d, #0000); padding: 6vh 6vw 2vh; justify-content: flex-end; }
+.ov[data-tipo="mensaje"] .grande { display: none; }
+.ov[data-tipo="mensaje"] .texto { font-size: clamp(22px, 3.4vw, 90px); max-width: 40ch; color: #fff; }
+.ov[data-tipo="video"] { background: #000; padding: 2vh 2vw; }
+.ov video, .ov iframe { width: 100%; height: 100%; max-height: 92vh; border: 0; background: #000; border-radius: 1vw; }
+.ov .minireloj { position: absolute; top: 2vh; right: 2.5vw; font-family: var(--f-led); font-weight: 900; font-size: clamp(22px, 3vw, 80px); color: rgb(var(--led)); text-shadow: 0 0 .3em rgba(var(--led), .7); z-index: 2; }
+.anillo { width: clamp(90px, 11vw, 260px); height: clamp(90px, 11vw, 260px); }
+.anillo circle { fill: none; stroke-width: 7; }
+.anillo .fondo { stroke: #fff2; }
+.anillo .avance { stroke: #c084fc; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.anillo text { fill: #fff; font: 700 30px var(--f-led); text-anchor: middle; dominant-baseline: central; }
+
+/* Gags */
+.ov[data-tipo="gag"] { background: radial-gradient(90% 90% at 50% 40%, #14141c, #050508); }
+.term { width: min(88vw, 1500px); min-height: 48vh; background: #0a0f0c; border: 1px solid #1f3a28; border-radius: 1vw; padding: 2.4vw; text-align: left; font: 600 clamp(16px, 2.3vw, 58px)/1.55 "Cascadia Mono", "JetBrains Mono", Consolas, monospace; color: #7cff9b; white-space: pre-wrap; box-shadow: 0 0 70px #1aff6a22; }
+.term .rojo { color: #ff6b6b; } .term .gris { color: #8fa3ad; }
+.term .cur::after { content: "▍"; animation: parpadeo .7s steps(2, start) infinite; }
+.carga { width: min(78vw, 1400px); height: clamp(18px, 3vw, 70px); border-radius: 99px; background: #1e1e26; overflow: hidden; border: 2px solid #3a3a46; }
+.carga div { height: 100%; width: 0; background: linear-gradient(90deg, #22c55e, #a3e635); transition: width .15s linear, background .4s; }
+.toasts { display: flex; flex-direction: column; gap: 1.2vw; width: min(82vw, 1600px); }
+.toast { background: #15151c; border: 1px solid #333; border-left: .7vw solid #f59e0b; border-radius: 1vw; padding: 1.1vw 1.8vw; text-align: left; font-size: clamp(18px, 2.7vw, 68px); font-weight: 700; animation: desliza .45s ease-out; }
+.meme { position: relative; width: min(72vw, 118vh); aspect-ratio: 1 / 1; max-height: 86vh; border-radius: 1.2vw; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 42%, #2e2e40, #0c0c14); overflow: hidden; animation: tiembla 4s ease-in-out infinite; }
+.meme .emj { font-size: min(34vw, 50vh); filter: drop-shadow(0 0 30px rgba(255, 255, 255, .15)); }
+.meme .top, .meme .bot { position: absolute; left: 3%; right: 3%; text-align: center; font: 400 clamp(26px, 5.6vw, 140px)/1.02 Anton, Impact, "Arial Narrow", sans-serif; color: #fff; text-transform: uppercase; -webkit-text-stroke: .16vw #000; paint-order: stroke fill; text-shadow: 0 .3vw 0 #000; }
+.meme .top { top: 3%; } .meme .bot { bottom: 3%; }
+.meme img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* Ayuda */
+.ayuda { position: absolute; z-index: 20; right: 2vw; bottom: 2vh; background: #000d; border: 1px solid var(--linea); border-radius: 14px; padding: 1.4em 1.8em; text-align: left; font-size: clamp(14px, 1.3vw, 24px); line-height: 1.7; display: none; }
+.ayuda.on { display: block; }
+.ayuda kbd { display: inline-block; min-width: 1.8em; text-align: center; padding: 0 .4em; margin-right: .6em; border: 1px solid #555; border-radius: 6px; background: #1b1b22; font: 700 .9em var(--f-ui); }
+
+@keyframes pulso { 50% { text-shadow: 0 0 .16em rgba(var(--led), 1), 0 0 .7em rgba(var(--led), .55); } }
+@keyframes parpadeo { to { opacity: .25; } }
+@keyframes llamado { 50% { box-shadow: 0 0 0 6px rgba(var(--led), .2); } }
+@keyframes sube { 0% { opacity: 0; transform: translateY(0) rotate(-8deg); } 10% { opacity: .95; } 85% { opacity: .9; } 100% { opacity: 0; transform: translateY(-118vh) rotate(10deg); } }
+@keyframes desliza { from { transform: translateX(30vw); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes tiembla { 0%, 100% { transform: rotate(-1deg) scale(1); } 50% { transform: rotate(1deg) scale(1.03); } }
+@keyframes entra { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@keyframes titila { 50% { background: rgba(190, 20, 20, .96); } }
+@keyframes ojo { 0%, 100% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.12); opacity: 1; } }
+@keyframes glitch { 0% { transform: translate(0); text-shadow: 3px 0 #f0f8, -3px 0 #0ff8; } 50% { transform: translate(-.5%, .6%) skewX(-3deg); opacity: .55; } 100% { transform: translate(.6%, -.4%); text-shadow: -3px 0 #f0f8, 3px 0 #0ff8; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .flota { display: none; } }
+</style>
+</head>
+<body>
+<main class="reloj" id="reloj" data-fase="espera">
+  <div class="destello" aria-hidden="true"></div>
+
+  <header class="cab">
+    <span class="chip"><span class="em">😴</span><span class="fase">En espera</span></span>
+    <span class="titulo">Prueba técnica · Ficha ADSO 3145555</span>
+    <span class="hora">Hora Colombia <b>--:--:--</b></span>
+  </header>
+
+  <section class="centro">
+    <div class="dig" aria-label="Tiempo restante"><span>0</span><span>0</span><span class="c">:</span><span>0</span><span>0</span><span class="c">:</span><span>0</span><span>0</span></div>
+    <div class="sub"></div>
+    <div class="ticker" aria-live="polite"></div>
+  </section>
+
+  <section class="jornada">
+    <div class="barra"><div class="relleno"></div></div>
+    <div class="pie"><span class="ini"></span><span class="pct">0% transcurrido</span><span class="fin"></span></div>
+  </section>
+
+  <div class="ctrl">
+    <button class="son" id="btn-sonido">🔕 Activar sonido (S)</button>
+    <button id="btn-pantalla">⛶ Pantalla completa (F)</button>
+    <button id="btn-ayuda">⌨ Atajos (H)</button>
+  </div>
+
+  <div class="ov" id="ov"></div>
+  <aside class="ayuda" id="ayuda">
+    <div><kbd>F</kbd>Pantalla completa</div>
+    <div><kbd>S</kbd>Sonido</div>
+    <div><kbd>1</kbd>Alerta ahora</div>
+    <div><kbd>2</kbd>Pregunta al azar</div>
+    <div><kbd>3</kbd>Suspenso</div>
+    <div><kbd>4</kbd>Mensaje</div>
+    <div><kbd>5</kbd>Siguiente video</div>
+    <div><kbd>6</kbd>Sorpresa al azar</div>
+    <div><kbd>7</kbd>Meme</div>
+    <div><kbd>8</kbd>Falsa alarma</div>
+    <div><kbd>Esc</kbd>Cerrar lo que esté en pantalla</div>
+    <div><kbd>H</kbd>Mostrar u ocultar esta ayuda</div>
+  </aside>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  // =====================================================================================
+  //  CONFIGURACIÓN — todo lo que se puede tocar está aquí arriba
+  // =====================================================================================
+  const params = new URLSearchParams(location.search);
+  const hm = (v, def) => { const m = /^(\d{1,2}):(\d{2})$/.exec(v || ""); return m ? [+m[1], +m[2]] : def; };
+  const INICIO = hm(params.get("inicio"), [6, 50]);      // hora Colombia
+  const FIN = hm(params.get("fin"), [11, 0]);            // hora Colombia
+  const DEMO = parseFloat(params.get("demo")) || 0;      // ?demo=3  → toda la jornada comprimida en 3 minutos
+  const NOMINAL = 345 * 60;                              // 9:15 a 15:00 en segundos; los minutos de abajo se miden sobre esto
+
+  // Fases: la de lectura dura los primeros 45 min; integración las últimas 60 min; cierre los últimos 15 min.
+  const LECTURA_MIN = 45;
+
+  // Ritmo de cada fase: tic por segundo, volumen, y cada cuántos segundos cae el golpe grave.
+  const RITMO = {
+    lectura:      { tics: 1, vol: 0.12, golpe: 60, fuerza: 0.45 },
+    construccion: { tics: 1, vol: 0.24, golpe: 20, fuerza: 0.65 },
+    integracion:  { tics: 2, vol: 0.34, golpe: 10, fuerza: 0.85 },
+  };
+
+  const FASES = {
+    espera:       { em: "😴", nombre: "En espera",              flota: ["💤", "⌛"], cada: 7000 },
+    lectura:      { em: "📖", nombre: "Lectura del spec",       flota: ["📖", "🧭", "🔍", "☕", "📚"], cada: 6000 },
+    construccion: { em: "🔨", nombre: "Construcción",           flota: ["💻", "🔨", "⚙️", "🧪", "☕", "🚧"], cada: 3800 },
+    integracion:  { em: "🔧", nombre: "Integración y commits",  flota: ["🔧", "🔗", "📦", "🔥", "👀", "⏳"], cada: 2400 },
+    cierre:       { em: "🔥", nombre: "Cierre",                 flota: ["🔥", "⏰", "😬", "🚨", "💥", "🫣"], cada: 1100 },
+    fin:          { em: "🎤", nombre: "Tiempo terminado",       flota: ["🎤", "👏", "🎉", "🏁"], cada: 700 },
+  };
+
+  // Frases cortas que rotan debajo del reloj según la fase.
+  const FRASES = {
+    espera: ["😴 Todavía no empieza. Abran el repo docs.", "🧭 Primero lean, después escriban."],
+    lectura: ["🧭 El orden: constitution → spec → plan → data-model → api-contract.", "📖 ¿Ya leyeron la constitución completa?", "🔍 Cada historia tiene criterios de aceptación: ahí está el examen.", "🧠 Entender el spec vale más que escribir rápido."],
+    construccion: ["🔨 Construir desde el spec, no de memoria.", "🧪 Una tarea con evidencia vale más que tres a medias.", "💾 Commits pequeños y seguidos.", "🧱 Dominio primero, framework después.", "🤝 Dudas: se preguntan al spec antes que al compañero."],
+    integracion: ["🔗 ¿Frontend y API ya se hablan de verdad?", "📦 Lo que no está en GitHub no existe.", "🎬 Piensen qué van a mostrar en la feria.", "🧹 No dejen secretos ni .env en el repo."],
+    cierre: ["🔥 Push ahora. Después se arregla.", "😬 Último tramo: nada nuevo, solo cerrar.", "🚨 Lo que no está subido no se presenta."],
+    fin: ["🎤 Manos fuera del teclado.", "👏 A la feria de presentación."],
+  };
+
+  // Preguntas que aparecen a pantalla completa; se contestan en voz alta, no se escriben.
+  const PREGUNTAS = {
+    lectura: ["¿Ya clonaron o hicieron fork del repo docs?", "¿Quién puede explicar qué hace el CHECK de ejemplares disponibles?", "¿Cuántos libros puede tener sin devolver un socio?"],
+    construccion: ["¿Su último commit tiene menos de 30 minutos?", "¿Su API ya responde /health?", "¿Están construyendo desde el spec o de memoria?", "¿Qué pasa si prestan el último ejemplar dos veces a la vez?"],
+    integracion: ["¿Todo lo importante ya está en GitHub?", "¿El frontend ya habla con la API de verdad?", "¿Qué van a mostrar primero en la feria?"],
+    cierre: ["¿Ya hicieron push?", "Si se va la luz ahora, ¿qué se pierde?"],
+  };
+
+  // Cosas de suspenso: la pantalla se apaga, late un corazón y aparece un mensaje.
+  const SUSPENSOS = [
+    "Se está revisando el historial de commits…",
+    "Alguien está comparando lo hecho con el spec…",
+    "Auditoría sorpresa en marcha. ¿Lo que dicen que hicieron está en GitHub?",
+  ];
+
+  const BROMAS = true;       // false apaga la falsa alarma
+
+  // Memes originales (emoji + texto arriba y abajo). Para usar una imagen o un gif tuyo: { tipo: "imagen", src: "memes/mi-meme.jpg", top: "…", bot: "…" }
+  const MEMES = [
+    { em: "😅", top: "Mi código a las 10:55 a. m.", bot: "«Esto compila… creo»" },
+    { em: "🤡", top: "«Lo leo después»", bot: "El spec tenía la respuesta" },
+    { em: "🪦", top: "Aquí yace el .env", bot: "Subido a un repo público" },
+    { em: "🫠", top: "«Solo falta el frontend»", bot: "Son las 10:40" },
+    { em: "🧠", top: "Spec leído antes de codear", bot: "Cero reescrituras" },
+    { em: "🥲", top: "Mi último commit", bot: "«cambios»" },
+    { em: "🧯", top: "Ejemplares disponibles: -1", bot: "El CHECK de la base: «no»" },
+    { em: "🦥", top: "Commit cada 3 horas", bot: "Y el último dice «wip»" },
+  ];
+  const TOASTS = [
+    "🔔 Tu compañero: «yo no toqué nada»", "⚠️ Conflicto de merge en 14 archivos", "🔥 node_modules subido al repo (212 MB)",
+    "😬 Un .env en el commit: toca rotar claves", "✅ Tests: 0 pasados, 0 fallidos (no hay tests)", "📦 vendor/ ya tiene 48 000 archivos",
+    "🧟 Tu rama lleva 3 días sin sincronizar", "📡 La API responde 500… era el puerto",
+  ];
+  const GAGS = ["carga99", "terminal", "toasts", "meme", "cafe"];
+
+  // Línea de tiempo (minutos desde el inicio, sobre 345 min). tipo: mensaje | pregunta | suspenso | alerta | video
+  const EVENTOS = [
+    { min: 0,   tipo: "mensaje",  em: "🚀", texto: "¡Arrancamos! Abran el repo docs y lean antes de escribir." },
+    { min: 6,   tipo: "pregunta", fase: "lectura" },
+    { min: 25,  tipo: "mensaje",  em: "🧭", texto: "Pista: la constitución se verifica; si la viola el código, se rechaza." },
+    { min: LECTURA_MIN, tipo: "mensaje", em: "🔨", texto: "Se acabó la lectura. Ahora se construye." },
+    { min: 70,  tipo: "suspenso", texto: SUSPENSOS[0] },
+    { min: 95,  tipo: "pregunta", fase: "construccion" },
+    // Videos de YouTube (se incrustan; necesitan internet). yt = id del video, desde/dur = segundos. Todos verificados con el oEmbed de YouTube.
+    { min: 28,  tipo: "video", yt: "g8ICfnTHkzU", desde: 0, dur: 40, titulo: "Yo en el examen de programación" },
+    { min: 100, tipo: "video", yt: "2NbN9sqg7TM", desde: 0, dur: 35, titulo: "3 horas buscando el bug" },
+    { min: 140, tipo: "video", yt: "LLqxKnGxYGA", desde: 0, dur: 35, titulo: "Cuando subes el .env a GitHub" },
+    { min: 192, tipo: "video", yt: "L9yHnbdKdLw", desde: 0, dur: 45, titulo: "Jefe vs programador en fecha de entrega" },
+    { min: 226, tipo: "video", yt: "f7OrecEJRcE", desde: 0, dur: 35, titulo: "Deploy sin probar" },
+    { min: 250, tipo: "video", yt: "HBHPIkbMfIw", desde: 0, dur: 40, titulo: "git push vs git push --force" },
+    { min: 296, tipo: "video", yt: "Q0t93uIbQy0", desde: 0, dur: 40, titulo: "Cuando el código no funciona después de 4 horas" },
+    // Un archivo tuyo en vez de YouTube:  { min: 120, tipo: "video", src: "videos/clip-1.mp4", desde: 0, dur: 45, titulo: "Mi clip" },
+    { min: 150, tipo: "suspenso", texto: SUSPENSOS[1] },
+    { min: 172, tipo: "alerta",   em: "⏱️", texto: "Mitad del tiempo" },
+    { min: 200, tipo: "pregunta", fase: "construccion" },
+    { min: 235, tipo: "mensaje",  em: "☕", texto: "Respiren un minuto. Después, a lo que falta." },
+    { min: 255, tipo: "suspenso", texto: SUSPENSOS[2] },
+    { min: 287, tipo: "pregunta", fase: "integracion" },
+    { min: 318, tipo: "pregunta", fase: "integracion" },
+    { min: 333, tipo: "pregunta", fase: "cierre" },
+    // Escenas de humor y sorpresas
+    { min: 12,  tipo: "gag", id: "meme" },
+    { min: 85,  tipo: "gag", id: "terminal" },
+    { min: 112, tipo: "gag", id: "meme" },
+    { min: 132, tipo: "gag", id: "carga99" },
+    { min: 165, tipo: "gag", id: "cafe" },
+    { min: 181, tipo: "gag", id: "fakefin" },
+    { min: 215, tipo: "gag", id: "toasts" },
+    { min: 232, tipo: "gag", id: "meme" },
+    { min: 270, tipo: "gag", id: "carga99" },
+    { min: 302, tipo: "gag", id: "meme" },
+    { min: 326, tipo: "gag", id: "meme" },
+  ];
+
+  // Avisos por tiempo restante (segundos sobre la jornada de 345 min): alarma, voz y banner.
+  const AVISOS = {
+    18000: ["Quedan cinco horas.", "⏳"], 14400: ["Quedan cuatro horas.", "⏳"], 10800: ["Quedan tres horas.", "⏳"],
+    7200: ["Quedan dos horas.", "⏳"], 3600: ["Atención. Queda una hora.", "🔔"], 1800: ["Quedan treinta minutos.", "🚨"],
+    900: ["Quedan quince minutos.", "🚨"], 600: ["Quedan diez minutos.", "🚨"], 300: ["Quedan cinco minutos.", "🔥"],
+    120: ["Quedan dos minutos.", "🔥"], 60: ["Último minuto.", "💥"],
+  };
+
+  // =====================================================================================
+  //  TIEMPO
+  // =====================================================================================
+  const DESFASE = -5 * 3600e3;                            // Colombia: siempre UTC−5
+  const hoyColombiaA = ([h, m]) => { const c = new Date(Date.now() + DESFASE); return Date.UTC(c.getUTCFullYear(), c.getUTCMonth(), c.getUTCDate(), h, m) - DESFASE; };
+  let inicioMs = hoyColombiaA(INICIO), finMs = hoyColombiaA(FIN);
+  if (DEMO) { inicioMs = Date.now() + 4000; finMs = inicioMs + DEMO * 60e3; }
+  const D = (finMs - inicioMs) / 1000;                   // duración real en segundos
+  const K = D / NOMINAL;                                 // escala (1 en la jornada normal)
+  const S = (seg) => seg * K;
+
+  const root = document.getElementById("reloj");
+  const $ = (s) => root.querySelector(s);
+  const fmtCorta = new Intl.DateTimeFormat("es-CO", { timeZone: "America/Bogota", hour: "numeric", minute: "2-digit", hour12: true });
+  const fmtHora = new Intl.DateTimeFormat("es-CO", { timeZone: "America/Bogota", hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true });
+  const etqInicio = fmtCorta.format(inicioMs), etqFin = fmtCorta.format(finMs);
+  $(".ini").textContent = "Inicio " + etqInicio;
+  $(".fin").textContent = "Fin " + etqFin;
+  const celdas = [...root.querySelectorAll(".dig span:not(.c)")];
+  const dos = (n) => String(n).padStart(2, "0");
+
+  // Fases y marcadores dibujados en la barra
+  const barra = $(".barra");
+  const tramos = [["lectura", 0, S(LECTURA_MIN * 60)], ["construccion", S(LECTURA_MIN * 60), D - S(3600)], ["integracion", D - S(3600), D - S(900)], ["cierre", D - S(900), D]];
+  tramos.forEach(([f, a, b]) => {
+    const e = document.createElement("div"); e.className = "seg";
+    e.style.cssText = "left:" + (a / D * 100) + "%;width:" + ((b - a) / D * 100) + "%;background:rgb(" + { lectura: "56,189,248", construccion: "255,122,26", integracion: "250,204,21", cierre: "255,59,48" }[f] + ")";
+    barra.prepend(e);
+  });
+  EVENTOS.forEach((ev) => { if (["alerta", "suspenso", "video"].includes(ev.tipo)) { const m = document.createElement("div"); m.className = "marca"; m.style.left = (S(ev.min * 60) / D * 100) + "%"; barra.appendChild(m); } });
+
+  function faseDe(t, rest) {
+    const trans = (t - inicioMs) / 1000;
+    if (t < inicioMs) return "espera";
+    if (rest <= 0) return "fin";
+    if (rest <= S(900)) return "cierre";
+    if (rest <= S(3600)) return "integracion";
+    if (trans < S(LECTURA_MIN * 60)) return "lectura";
+    return "construccion";
+  }
+
+  // =====================================================================================
+  //  SONIDO
+  // =====================================================================================
+  let ctx = null, salida = null, sala = null, ruido = null, sonidoOn = false, tac = 0, voz = null;
+
+  function prepararAudio() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -12; comp.ratio.value = 4; comp.connect(ctx.destination);
+    salida = ctx.createGain(); salida.gain.value = 0.9; salida.connect(comp);
+    sala = ctx.createConvolver();
+    const n = Math.floor(ctx.sampleRate * 2.5), ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); }
+    sala.buffer = ir;
+    const humedo = ctx.createGain(); humedo.gain.value = 0.35; sala.connect(humedo); humedo.connect(salida);
+    ruido = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.06), ctx.sampleRate);
+    const r = ruido.getChannelData(0); for (let i = 0; i < r.length; i++) r[i] = Math.random() * 2 - 1;
+  }
+  const envolvente = (g, t, pico, caida) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pico, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + caida); };
+  function osc(tipo, f, t, dur, destino) { const o = ctx.createOscillator(); o.type = tipo; o.frequency.setValueAtTime(f, t); o.connect(destino); o.start(t); o.stop(t + dur + 0.05); return o; }
+  const sonar = (fn) => { if (sonidoOn && ctx && ctx.state === "running") fn(); };
+
+  function tic(t, vol) {
+    const agudo = tac++ % 2 === 0;
+    const src = ctx.createBufferSource(); src.buffer = ruido;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = agudo ? 3400 : 2500; bp.Q.value = 6;
+    const g = ctx.createGain(); envolvente(g, t, vol, 0.045); src.connect(bp); bp.connect(g); g.connect(salida); src.start(t); src.stop(t + 0.06);
+    const g2 = ctx.createGain(); envolvente(g2, t, vol * 0.6, 0.03); g2.connect(salida); osc("triangle", agudo ? 1900 : 1400, t, 0.04, g2);
+  }
+  function latido(t, vol) { [0, 0.2].forEach((d, i) => { const g = ctx.createGain(); envolvente(g, t + d, vol * (i ? 0.7 : 1), 0.25); g.connect(salida); osc("sine", 70, t + d, 0.3, g).frequency.exponentialRampToValueAtTime(38, t + d + 0.22); }); }
+  function golpe(fuerza) {
+    const t = ctx.currentTime + 0.01;
+    const g = ctx.createGain(); envolvente(g, t, 0.95 * fuerza, 1.3); g.connect(salida);
+    osc("sine", 120, t, 1.4, g).frequency.exponentialRampToValueAtTime(36, t + 0.7);
+    [329.63, 349.23, 466.16].forEach((f) => {
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(2600, t); lp.frequency.exponentialRampToValueAtTime(260, t + 0.9);
+      const gs = ctx.createGain(); envolvente(gs, t, 0.11 * fuerza, 1.0); lp.connect(gs); gs.connect(salida); gs.connect(sala); osc("sawtooth", f, t, 1.05, lp);
+    });
+    destello(fuerza);
+  }
+  function bip(t, f, vol, dur) {
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.setValueAtTime(vol, t + dur); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.03);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 4000; lp.connect(g); g.connect(salida); osc("square", f, t, dur + 0.03, lp);
+  }
+  function alarma() { const t = ctx.currentTime + 0.01; for (let k = 0; k < 3; k++) for (let j = 0; j < 4; j++) bip(t + k * 0.75 + j * 0.15, j % 2 ? 1175 : 880, 0.22, 0.11); destello(1); }
+  // Sirena: sube y baja entre dos tonos, tres vueltas.
+  function sirena() {
+    const t = ctx.currentTime + 0.01, g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.05); g.gain.setValueAtTime(0.2, t + 3.3); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.6);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400; lp.connect(g); g.connect(salida);
+    const o = osc("sawtooth", 600, t, 3.6, lp);
+    for (let k = 0; k < 3; k++) { o.frequency.linearRampToValueAtTime(1100, t + k * 1.1 + 0.55); o.frequency.linearRampToValueAtTime(600, t + k * 1.1 + 1.1); }
+    destello(1);
+  }
+  // Pregunta: tres notas que suben, como un sonar.
+  function sonarPregunta() { const t = ctx.currentTime + 0.01; [523.25, 659.25, 880].forEach((f, i) => { const g = ctx.createGain(); envolvente(g, t + i * 0.22, 0.22, 0.9); g.connect(salida); g.connect(sala); osc("sine", f, t + i * 0.22, 1, g); }); }
+  // Mensaje: campanita corta.
+  function campanita() { const t = ctx.currentTime + 0.01; [988, 1319].forEach((f, i) => { const g = ctx.createGain(); envolvente(g, t + i * 0.12, 0.16, 0.7); g.connect(salida); g.connect(sala); osc("sine", f, t + i * 0.12, 0.8, g); }); }
+  // Suspenso: zumbido grave que crece más latidos que se aceleran.
+  function suspensoSonido(seg) {
+    const t = ctx.currentTime + 0.01;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + seg * 0.9); g.gain.exponentialRampToValueAtTime(0.0001, t + seg + 0.4); g.connect(salida);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(220, t); lp.frequency.exponentialRampToValueAtTime(900, t + seg); lp.connect(g);
+    [55, 58.3].forEach((f) => osc("sawtooth", f, t, seg + 0.5, lp));
+    let at = 0, paso = 1.2; while (at < seg - 0.6) { latido(t + at, 0.55); at += paso; paso = Math.max(0.45, paso * 0.86); }
+  }
+  // Trombón triste: cuatro notas que bajan.
+  function trombon() {
+    const t = ctx.currentTime + 0.01;
+    [[311.1, 0, 0.5], [293.7, 0.55, 0.5], [277.2, 1.1, 0.5], [261.6, 1.65, 1.3]].forEach(([f, d, dur], i) => {
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(0.2, t + d + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + d + dur);
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900; lp.connect(g); g.connect(salida);
+      const o = osc("sawtooth", f, t + d, dur, lp); if (i === 3) o.frequency.linearRampToValueAtTime(215, t + d + dur);
+    });
+  }
+  function errorBuzz() { const t = ctx.currentTime + 0.01; [0, 0.22].forEach((d) => bip(t + d, 160, 0.25, 0.16)); }
+  function chicharra() {
+    const t = ctx.currentTime + 0.01;
+    [110, 116.5, 55].forEach((f) => { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1400; const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.28, t + 0.02); g.gain.setValueAtTime(0.28, t + 1.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.1); lp.connect(g); g.connect(salida); osc("sawtooth", f, t, 2.2, lp); });
+    destello(1);
+  }
+  function decir(texto) {
+    if (!sonidoOn || !("speechSynthesis" in window)) return;
+    try {
+      if (!voz) voz = speechSynthesis.getVoices().find((v) => /^es([-_]|$)/i.test(v.lang)) || null;
+      const u = new SpeechSynthesisUtterance(texto); u.lang = voz ? voz.lang : "es-CO"; if (voz) u.voice = voz; u.rate = 0.95; u.pitch = 0.8; u.volume = 1;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (e) { /* sin voz queda el sonido */ }
+  }
+  if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { voz = null; };
+
+  // Cada segundo, según la fase: el ritmo cambia de una fase a otra.
+  function porSegundo(rest, fase) {
+    const t = ctx.currentTime + 0.01;
+    if (rest <= S(900) || fase === "cierre") {
+      const golpes = rest <= S(60) ? 4 : 2, vol = rest <= S(300) ? 0.55 : 0.4;
+      for (let i = 0; i < golpes; i++) tic(t + i / golpes, vol);
+      if (rest <= S(300)) latido(t, rest <= S(60) ? 0.9 : 0.6);
+      if (rest <= 10) bip(t, 1568, 0.32, 0.18); else if (rest <= S(60)) bip(t, 1046, 0.2, 0.08);
+      return;
+    }
+    const r = RITMO[fase] || RITMO.construccion;
+    for (let i = 0; i < r.tics; i++) tic(t + i / r.tics, r.vol);
+  }
+
+  // =====================================================================================
+  //  EFECTOS EN PANTALLA
+  // =====================================================================================
+  const capa = $(".destello");
+  const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function destello(f) { if (quieto || !capa.animate) return; capa.animate([{ opacity: 0 }, { opacity: Math.min(1, f) }, { opacity: 0 }], { duration: 650, easing: "ease-out" }); }
+
+  let faseActual = null, timerFlota = null;
+  function flotar() {
+    const cfg = FASES[faseActual]; if (!cfg || quieto || document.hidden) return;
+    const e = document.createElement("div"); e.className = "flota";
+    e.textContent = cfg.flota[Math.floor(Math.random() * cfg.flota.length)];
+    e.style.left = (4 + Math.random() * 90) + "%"; e.style.setProperty("--dur", (7 + Math.random() * 4) + "s");
+    root.appendChild(e); setTimeout(() => e.remove(), 12000);
+  }
+  function programarFlota() { clearInterval(timerFlota); timerFlota = setInterval(flotar, FASES[faseActual].cada); }
+
+  const tk = $(".ticker"); let tkIdx = 0, tkTimer = null;
+  function rotarFrase() {
+    const lista = FRASES[faseActual] || []; if (!lista.length) return;
+    tk.classList.remove("on");
+    setTimeout(() => { tk.textContent = lista[tkIdx++ % lista.length]; tk.classList.add("on"); }, 600);
+  }
+  function programarFrases() { clearInterval(tkTimer); tkIdx = 0; rotarFrase(); tkTimer = setInterval(rotarFrase, 18000); }
+
+  function cambiarFase(f) {
+    const prev = faseActual; faseActual = f;
+    root.dataset.fase = f;
+    $(".chip .em").textContent = FASES[f].em; $(".chip .fase").textContent = FASES[f].nombre;
+    programarFlota(); programarFrases();
+    if (prev && prev !== "espera") { // cambio de ritmo: se nota en pantalla y en el sonido
+      destello(0.6);
+      sonar(() => { golpe(0.9); });
+      if (!["fin"].includes(f)) mostrar({ tipo: "mensaje", em: FASES[f].em, texto: "Nueva fase: " + FASES[f].nombre }, 6000);
+    }
+  }
+
+  // =====================================================================================
+  //  SUPERPOSICIONES (cola de eventos)
+  // =====================================================================================
+  const ov = document.getElementById("ov");
+  const cola = []; let activo = null, cierre = null, tickOv = null, ultEvento = Date.now(); let tempos = [];
+  const despues = (ms, fn) => { tempos.push(setTimeout(fn, ms)); };
+  const barajar = (a) => a.map((x) => [Math.random(), x]).sort((u, v) => u[0] - v[0]).map((x) => x[1]);
+  const rand = (a) => a[Math.floor(Math.random() * a.length)];
+
+  function mostrar(ev, ms) { if (ev.tipo === "gag" && ev.id === "fakefin" && !BROMAS) return; ultEvento = Date.now(); cola.push({ ev, ms }); if (!activo) siguiente(); }
+  function siguiente() {
+    const n = cola.shift(); if (!n) { activo = null; return; }
+    activo = n.ev; const { ev } = n;
+    clearTimeout(cierre); clearInterval(tickOv); ov.innerHTML = ""; ov.dataset.tipo = ev.tipo;
+    if (ev.tipo === "gag" && !ev.id) ev.id = rand(GAGS);
+    const DUR_GAG = { carga99: 10500, terminal: 15500, toasts: 11500, meme: 8000, cafe: 9500, fakefin: 9500 };
+    const dur = n.ms || { pregunta: 25000, alerta: 7000, suspenso: 10000, mensaje: 7000, imagen: 8000, video: (ev.dur || 30) * 1000, gag: DUR_GAG[ev.id] || 9000 }[ev.tipo] || 7000;
+    root.classList.toggle("glitch", ev.tipo === "suspenso");
+
+    if (ev.tipo === "pregunta") {
+      const q = ev.texto || rand(PREGUNTAS[ev.fase && PREGUNTAS[ev.fase] ? ev.fase : (PREGUNTAS[faseActual] ? faseActual : "construccion")]);
+      ov.innerHTML = '<div class="etq">Pregunta para el grupo · respondan en voz alta</div><div class="grande">❓</div><div class="texto"></div>' +
+        '<svg class="anillo" viewBox="0 0 100 100"><circle class="fondo" cx="50" cy="50" r="44"/><circle class="avance" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="0"/><text x="50" y="52">0</text></svg>';
+      ov.querySelector(".texto").textContent = q;
+      const av = ov.querySelector(".avance"), tx = ov.querySelector("text"), t0 = Date.now();
+      tickOv = setInterval(() => { const f = Math.min(1, (Date.now() - t0) / dur); av.style.strokeDashoffset = 276.5 * f; tx.textContent = Math.max(0, Math.ceil((dur - (Date.now() - t0)) / 1000)); }, 200);
+      sonar(sonarPregunta); setTimeout(() => decir(q), 1000);
+    } else if (ev.tipo === "alerta") {
+      ov.innerHTML = '<div class="etq">Alerta</div><div class="grande"></div><div class="texto"></div>';
+      ov.querySelector(".grande").textContent = ev.em || "🚨"; ov.querySelector(".texto").textContent = ev.texto;
+      sonar(sirena); setTimeout(() => decir(ev.voz || ev.texto), 3700);
+    } else if (ev.tipo === "suspenso") {
+      ov.innerHTML = '<div class="grande">👁️</div><div class="texto"></div>';
+      ov.querySelector(".texto").textContent = ev.texto || rand(SUSPENSOS);
+      sonar(() => suspensoSonido(dur / 1000 - 0.5));
+    } else if (ev.tipo === "video") {
+      let el;
+      if (ev.yt) { el = document.createElement("iframe"); el.allow = "autoplay; encrypted-media; fullscreen"; el.referrerPolicy = "strict-origin-when-cross-origin"; el.addEventListener("load", () => { [700, 1800, 3500].forEach((ms) => setTimeout(() => { try { el.contentWindow.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), "*"); } catch (e) { /* sin permiso */ } }, ms)); }); el.src = "https://www.youtube.com/embed/" + encodeURIComponent(ev.yt) + "?autoplay=1&mute=" + (sonidoOn ? 0 : 1) + "&controls=0&playsinline=1&enablejsapi=1&start=" + (ev.desde || 0) + "&end=" + ((ev.desde || 0) + (ev.dur || 30)) + "&rel=0&modestbranding=1"; }
+      else { el = document.createElement("video"); el.src = ev.src; el.muted = !!ev.mudo || false; el.autoplay = true; el.playsInline = true; el.currentTime = 0; el.addEventListener("loadedmetadata", () => { if (ev.desde) el.currentTime = ev.desde; }); el.addEventListener("error", () => { cola.length = 0; cerrar(); }); }
+      const mini = document.createElement("div"); mini.className = "minireloj"; mini.textContent = "00:00:00";
+      ov.append(mini, el);
+      tickOv = setInterval(() => { mini.textContent = dos(Math.floor(restante() / 3600)) + ":" + dos(Math.floor((restante() % 3600) / 60)) + ":" + dos(restante() % 60); }, 500);
+    } else if (ev.tipo === "gag" || ev.tipo === "imagen") {
+      renderGag(ev, dur);
+    } else { // mensaje
+      ov.innerHTML = '<div class="texto"></div>';
+      ov.querySelector(".texto").textContent = (ev.em ? ev.em + " " : "") + ev.texto;
+      sonar(campanita); setTimeout(() => decir(ev.texto), 800);
+    }
+    ov.classList.add("on");
+    cierre = setTimeout(cerrar, dur);
+  }
+  function cerrar() {
+    clearTimeout(cierre); clearInterval(tickOv); tempos.forEach(clearTimeout); tempos = []; root.classList.remove("glitch");
+    ov.classList.remove("on"); ov.innerHTML = "";
+    activo = null; setTimeout(() => { if (!activo) siguiente(); }, 400);
+  }
+
+  function renderGag(ev, dur) {
+    if (ev.tipo === "imagen") {
+      ov.innerHTML = '<div class="meme"><img alt=""><div class="top"></div><div class="bot"></div></div>';
+      const im = ov.querySelector("img"); im.addEventListener("error", () => { cola.length = 0; cerrar(); }); im.src = ev.src;
+      ov.querySelector(".top").textContent = ev.top || ""; ov.querySelector(".bot").textContent = ev.bot || "";
+      sonar(campanita); return;
+    }
+    if (ev.id === "meme") {
+      const m = ev.meme || (ev.meme = rand(MEMES));
+      ov.innerHTML = '<div class="meme"><div class="top"></div><div class="emj"></div><div class="bot"></div></div>';
+      ov.querySelector(".top").textContent = m.top; ov.querySelector(".emj").textContent = m.em; ov.querySelector(".bot").textContent = m.bot;
+      sonar(campanita); despues(1200, () => decir(m.top + ". " + m.bot)); return;
+    }
+    if (ev.id === "carga99") {
+      ov.innerHTML = '<div class="etq">Subiendo a GitHub…</div><div class="grande">😰</div><div class="carga"><div></div></div><div class="texto">0%</div>';
+      const bar = ov.querySelector(".carga div"), tx = ov.querySelector(".texto"), em = ov.querySelector(".grande"), t0 = Date.now();
+      tickOv = setInterval(() => { const f = Math.min(1, (Date.now() - t0) / 5500), p = Math.floor(99 * (1 - Math.pow(1 - f, 2.2))); bar.style.width = p + "%"; tx.textContent = p + "%"; }, 100);
+      despues(5700, () => { clearInterval(tickOv); bar.style.width = "99%"; tx.textContent = "99%"; em.textContent = "😭"; });
+      despues(7300, () => { em.textContent = "💀"; tx.textContent = "Error 504: se cayó la red"; bar.style.background = "#ef4444"; sonar(trombon); });
+      return;
+    }
+    if (ev.id === "terminal") {
+      const lineas = [["$ git add .", ""], ["$ git commit -m \"arreglos finales\"", ""], ["$ git push", ""], [" ! [rejected] main -> main (non-fast-forward)", "rojo"], ["$ git push --force", ""], ["💀 Reescribiste la historia. Tus compañeros lloran.", "rojo"], ["# moraleja: primero git pull", "gris"]];
+      ov.innerHTML = '<div class="etq">Terminal · 10:58 a. m.</div><div class="term"></div>';
+      const term = ov.querySelector(".term"); let li = 0, ci = 0, cur = null;
+      tickOv = setInterval(() => {
+        if (li >= lineas.length) { clearInterval(tickOv); return; }
+        const [txt, cls] = lineas[li];
+        if (ci === 0) { if (cur) cur.classList.remove("cur"); cur = document.createElement("div"); cur.className = (cls ? cls + " " : "") + "cur"; term.appendChild(cur); }
+        if (ci < txt.length) { cur.textContent = txt.slice(0, ++ci); sonar(() => tic(ctx.currentTime + 0.01, 0.16)); }
+        else { li++; ci = 0; if (cls === "rojo") sonar(errorBuzz); }
+      }, 48);
+      return;
+    }
+    if (ev.id === "toasts") {
+      ov.innerHTML = '<div class="etq">Notificaciones · 10:41 a. m.</div><div class="toasts"></div>';
+      const box = ov.querySelector(".toasts"), items = barajar(TOASTS).slice(0, 5); let i = 0;
+      const poner = () => { if (i >= items.length) { clearInterval(tickOv); return; } const d = document.createElement("div"); d.className = "toast"; d.textContent = items[i++]; box.appendChild(d); sonar(campanita); };
+      poner(); tickOv = setInterval(poner, 1600); return;
+    }
+    if (ev.id === "cafe") {
+      ov.innerHTML = '<div class="etq">Nivel de café del grupo</div><div class="grande">☕</div><div class="carga"><div style="width:100%;background:linear-gradient(90deg,#92400e,#d97706)"></div></div><div class="texto">100%</div>';
+      const bar = ov.querySelector(".carga div"), tx = ov.querySelector(".texto"), em = ov.querySelector(".grande"), t0 = Date.now();
+      tickOv = setInterval(() => { const f = Math.min(1, (Date.now() - t0) / 6000), p = Math.max(3, Math.round(100 - 97 * f)); bar.style.width = p + "%"; tx.textContent = p + "%"; if (p < 40) em.textContent = "🥱"; if (f >= 1) { clearInterval(tickOv); em.textContent = "🧟"; tx.textContent = "Modo zombi activado"; sonar(trombon); } }, 120);
+      return;
+    }
+    if (ev.id === "fakefin") {
+      ov.dataset.tipo = "alerta";
+      ov.innerHTML = '<div class="etq">Alerta</div><div class="grande">🚨</div><div class="texto">¡Tiempo terminado!</div>';
+      sonar(chicharra); sonar(() => setTimeout(() => decir("Tiempo terminado"), 600));
+      despues(3800, () => {
+        const r = restante(), h = Math.floor(r / 3600), m = Math.floor((r % 3600) / 60);
+        ov.querySelector(".etq").textContent = "Falsa alarma"; ov.querySelector(".grande").textContent = "😈";
+        ov.querySelector(".texto").textContent = "Era broma. Aún les quedan " + (h ? h + " h " : "") + m + " min.";
+        sonar(campanita); decir("Era broma. Sigan trabajando.");
+      });
+    }
+  }
+
+  // =====================================================================================
+  //  CONTROLES
+  // =====================================================================================
+  let bloqueo = null;
+  async function pantallaEncendida() { try { if ("wakeLock" in navigator && !bloqueo) { bloqueo = await navigator.wakeLock.request("screen"); bloqueo.addEventListener("release", () => { bloqueo = null; }); } } catch (e) { /* opcional */ } }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && sonidoOn) pantallaEncendida(); });
+
+  const btnSon = document.getElementById("btn-sonido"), btnPc = document.getElementById("btn-pantalla"), btnAy = document.getElementById("btn-ayuda"), ayuda = document.getElementById("ayuda");
+  btnSon.addEventListener("click", async () => {
+    if (!ctx) prepararAudio(); if (ctx.state !== "running") await ctx.resume();
+    sonidoOn = !sonidoOn; btnSon.classList.toggle("on", sonidoOn);
+    btnSon.textContent = sonidoOn ? "🔔 Sonido activo (S)" : "🔕 Activar sonido (S)";
+    if (sonidoOn) { golpe(0.8); pantallaEncendida(); }
+  });
+  btnPc.addEventListener("click", () => {
+    if (document.fullscreenElement) { document.exitFullscreen(); return; }
+    (root.requestFullscreen ? root.requestFullscreen() : Promise.reject()).catch(() => { btnPc.textContent = "Usa F11"; });
+  });
+  btnAy.addEventListener("click", () => ayuda.classList.toggle("on"));
+
+  const videos = EVENTOS.filter((e) => e.tipo === "video"); let vIdx = 0;
+  document.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    if (k === "f") btnPc.click(); else if (k === "s") btnSon.click(); else if (k === "h") ayuda.classList.toggle("on");
+    else if (k === "escape") { cola.length = 0; cerrar(); }
+    else if (k === "1") mostrar({ tipo: "alerta", em: "🚨", texto: "Atención: revisen sus commits" });
+    else if (k === "2") mostrar({ tipo: "pregunta", fase: faseActual });
+    else if (k === "3") mostrar({ tipo: "suspenso", texto: rand(SUSPENSOS) });
+    else if (k === "4") mostrar({ tipo: "mensaje", em: "💬", texto: rand(FRASES[faseActual] || FRASES.construccion).replace(/^\S+\s/, "") });
+    else if (k === "6") mostrar({ tipo: "gag" });
+    else if (k === "7") mostrar({ tipo: "gag", id: "meme" });
+    else if (k === "8") mostrar({ tipo: "gag", id: "fakefin" });
+    else if (k === "5") { if (videos.length) mostrar(videos[vIdx++ % videos.length]); else mostrar({ tipo: "mensaje", em: "🎬", texto: "No hay videos configurados. Mira videos/LEEME.md" }); }
+  });
+  let reposo;
+  const despertar = () => { root.classList.remove("oculto"); clearTimeout(reposo); reposo = setTimeout(() => root.classList.add("oculto"), 3000); };
+  ["mousemove", "keydown", "click", "touchstart"].forEach((e) => document.addEventListener(e, despertar)); despertar();
+
+  // Tamaño de los dígitos: ocupan el ancho sin pasarse del alto.
+  const dig = $(".dig");
+  function ajustar() { const ancho = $(".centro").clientWidth; dig.style.fontSize = Math.max(36, Math.min(ancho / 5.98, $(".centro").clientHeight * 0.62, 900)) + "px"; }
+  window.addEventListener("resize", ajustar); document.addEventListener("fullscreenchange", ajustar); ajustar();
+
+  // =====================================================================================
+  //  BUCLE
+  // =====================================================================================
+  const restante = () => Math.max(0, Math.ceil((finMs - Date.now()) / 1000));
+  const disparados = new Set(); let previo = null, ultMin = -1;
+
+  function pintar(rest, t, fase) {
+    const txt = dos(Math.floor(rest / 3600)) + dos(Math.floor((rest % 3600) / 60)) + dos(rest % 60);
+    celdas.forEach((c, i) => { if (c.textContent !== txt[i]) c.textContent = txt[i]; });
+    $(".hora b").textContent = fmtHora.format(t);
+    const p = Math.min(1, Math.max(0, (t - inicioMs) / (finMs - inicioMs)));
+    $(".relleno").style.width = (p * 100).toFixed(2) + "%";
+    $(".pct").textContent = Math.floor(p * 100) + "% transcurrido";
+    $(".sub").innerHTML = fase === "espera" ? "El reto inicia a las <b>" + etqInicio + "</b> y termina a las <b>" + etqFin + "</b>"
+      : fase === "fin" ? "La prueba terminó a las <b>" + etqFin + "</b> · hora Colombia"
+      : "para las <b>" + etqFin + "</b> · hora Colombia (UTC−5)";
+  }
+
+  function tick() {
+    const t = Date.now(), rest = restante(), fase = faseDe(t, rest);
+    if (fase !== faseActual) cambiarFase(fase);
+    pintar(rest, t, fase);
+    const trans = (t - inicioMs) / 1000;
+
+    // Eventos de la línea de tiempo: se disparan una vez; si se abrió la página tarde, los viejos se omiten.
+    EVENTOS.forEach((ev, i) => {
+      const cuando = S(ev.min * 60);
+      if (!disparados.has(i) && trans >= cuando) { disparados.add(i); if (trans - cuando < 15) mostrar(ev); }
+    });
+
+    // Sorpresas: de vez en cuando, en construcción e integración, cae una escena al azar.
+    const minuto = Math.floor(trans / S(60));
+    if (minuto !== ultMin) { ultMin = minuto; if ((fase === "construccion" || fase === "integracion") && !activo && t - ultEvento > Math.max(30000, S(480) * 1000) && Math.random() < 0.25) mostrar({ tipo: "gag", id: rand(["meme", "toasts", "carga99", "cafe", "terminal"]) }); }
+
+    if (previo && rest !== previo.rest && t >= inicioMs) {
+      // Avisos por tiempo restante
+      const hito = Object.keys(AVISOS).map(Number).find((v) => previo.rest > S(v) && rest <= S(v));
+      if (hito) { const [voz1, em] = AVISOS[hito]; mostrar({ tipo: hito <= 3600 ? "alerta" : "mensaje", em, texto: voz1.replace(/\.$/, ""), voz: voz1 }, hito <= 3600 ? 6500 : 6000); sonar(alarma); }
+      sonar(() => {
+        if (rest === 0) { chicharra(); setTimeout(() => decir("Tiempo terminado. Manos fuera del teclado."), 2300); return; }
+        if (previo.t < inicioMs) { golpe(1); setTimeout(() => decir("Comienza la prueba."), 1200); return; }
+        porSegundo(rest, fase);
+        const r = RITMO[fase];
+        const cada = r ? r.golpe : 10, fuerza = r ? r.fuerza : (rest <= S(300) ? 1 : 0.8);
+        if (!hito && Math.floor((previo.rest - 1) / cada) >= Math.ceil(rest / cada)) golpe(fuerza);
+      });
+    }
+    previo = { rest, t };
+  }
+  // ?gag=terminal (o meme, carga99, toasts, cafe, fakefin) lanza esa escena al abrir: sirve para ensayar.
+  if (params.get("gag")) setTimeout(() => mostrar({ tipo: "gag", id: params.get("gag") }), 1500);
+  setInterval(tick, 250); tick();
+})();
+</script>
+</body>
+</html>
