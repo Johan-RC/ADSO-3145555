@@ -1,0 +1,8 @@
+# Estos archivos no se suben al repositorio
+*.zip
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
