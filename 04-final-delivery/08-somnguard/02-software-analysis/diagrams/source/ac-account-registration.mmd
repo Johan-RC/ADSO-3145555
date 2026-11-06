@@ -1,0 +1,8 @@
+flowchart TD
+    A[Ingresar datos de registro] --> B[Validar formato y unicidad del correo]
+    B --> C{¿Datos válidos?}
+    C -- No --> A
+    C -- Sí --> D[Crear cuenta con hash de contraseña]
+    D --> E[Enviar correo de validación]
+    E --> F[Usuario confirma el enlace de validación]
+    F --> G[Activar cuenta]

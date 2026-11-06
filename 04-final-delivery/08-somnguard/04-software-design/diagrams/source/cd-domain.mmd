@@ -1,0 +1,93 @@
+classDiagram
+    class User {
+        +String id
+        +String name
+        +String email
+        +String passwordHash
+        +login()
+        +requestPasswordReset()
+    }
+    class Role {
+        +String id
+        +String name
+    }
+    class Feature {
+        +String id
+        +String name
+        +String code
+    }
+    class Module {
+        +String id
+        +String name
+    }
+    class UserRole
+    class RoleFeature
+    class PasswordResetRequest {
+        +String token
+        +DateTime expiresAt
+    }
+    class AuditLogin {
+        +boolean success
+        +String ip
+        +DateTime occurredAt
+    }
+    class Device {
+        +String id
+        +String serial
+        +String apiKeyHash
+    }
+    class DeviceAssignment
+    class DeviceConfig {
+        +String soundPatternId
+        +int sensitivity
+    }
+    class Event {
+        +String id
+        +DateTime occurredAt
+        +int confidence
+    }
+    class Evidence {
+        +String id
+        +String mediaType
+        +String reference
+        +DateTime capturedAt
+    }
+    class AlertLog {
+        +String id
+        +DateTime emittedAt
+    }
+    class Notification {
+        +String id
+        +boolean read
+        +DateTime createdAt
+    }
+    class EventCategory
+    class EventType
+    class Severity
+    class MediaType
+    class SoundPattern
+
+    User "1" --> "0..*" UserRole
+    Role "1" --> "0..*" UserRole
+    Role "1" --> "0..*" RoleFeature
+    Feature "1" --> "0..*" RoleFeature
+    Module "1" --> "0..*" Feature
+    User "1" --> "0..*" PasswordResetRequest
+    User "1" --> "0..*" AuditLogin
+    User "1" --> "0..*" DeviceAssignment
+    Device "1" --> "0..*" DeviceAssignment
+    Device "1" --> "0..1" DeviceConfig
+    Device "1" --> "0..*" Event
+    EventCategory "1" --> "0..*" EventType
+    EventType "1" --> "0..*" Event
+    Severity "1" --> "0..*" EventType
+    SoundPattern "1" --> "0..*" EventType
+    Severity "1" --> "0..*" Event
+    SoundPattern "1" --> "0..1" Event
+    Event "1" --> "0..1" Evidence
+    Event "1" --> "0..*" AlertLog
+    Severity "1" --> "0..*" AlertLog
+    SoundPattern "1" --> "0..*" AlertLog
+    MediaType "1" --> "0..*" Evidence
+    AlertLog "1" --> "0..*" Notification
+    User "1" --> "0..*" Notification

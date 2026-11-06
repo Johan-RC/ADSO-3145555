@@ -1,0 +1,19 @@
+flowchart LR
+    A1[Conductor]
+    A2[Plataforma / Backend]
+
+    subgraph Dispositivo
+        UC1([Gestionar Ciclo de Vida del Dispositivo])
+        UC2([Capturar y Analizar Comportamiento])
+        UC3([Emitir Alertas Sonoras])
+        UC4([Registrar y Sincronizar Eventos])
+    end
+
+    A1 -->|Recibe| UC3
+    A1 -.->|Interacción pasiva| UC2
+
+    UC4 ==>|Envía datos| A2
+    A2 ==>|Envía configuración básica| UC1
+
+    UC2 -->|Desencadena| UC3
+    UC2 -->|Desencadena| UC4

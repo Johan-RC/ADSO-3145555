@@ -1,0 +1,59 @@
+---
+title: SomnGuard - Physical schema parameterization (snapshot 2026-11-06)
+---
+
+erDiagram
+    %% Snapshot of the local PostgreSQL schema. External tables are key-only context.
+    %% Full table definitions and non-key columns remain in the Liquibase SQL files.
+
+    PARAMETERIZATION__EVENT_CATEGORY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__EVENT_TYPE {
+        UUID id PK
+        UUID default_severity_id FK
+        UUID default_sound_pattern_id FK
+        UUID event_category_id FK
+    }
+
+    PARAMETERIZATION__GLOBAL_CONFIG {
+        INT2 id PK
+    }
+
+    PARAMETERIZATION__GLOBAL_CONFIG_HISTORY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__MEDIA_TYPE {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SEVERITY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SOUND_PATTERN {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__STATUS {
+        VARCHAR code PK
+        VARCHAR status_category FK
+    }
+
+    PARAMETERIZATION__STATUS_CATEGORY {
+        VARCHAR code PK
+    }
+
+    PARAMETERIZATION__STATUS_TRANSITION {
+        VARCHAR from_status PK,FK
+        VARCHAR to_status PK,FK
+    }
+
+    PARAMETERIZATION__EVENT_CATEGORY ||--o{ PARAMETERIZATION__EVENT_TYPE : event_category_id
+    PARAMETERIZATION__SEVERITY ||--o{ PARAMETERIZATION__EVENT_TYPE : default_severity_id
+    PARAMETERIZATION__SOUND_PATTERN ||--o{ PARAMETERIZATION__EVENT_TYPE : default_sound_pattern_id
+    PARAMETERIZATION__STATUS_CATEGORY ||--o{ PARAMETERIZATION__STATUS : status_category
+    PARAMETERIZATION__STATUS ||--o{ PARAMETERIZATION__STATUS_TRANSITION : from_status
+    PARAMETERIZATION__STATUS ||--o{ PARAMETERIZATION__STATUS_TRANSITION : to_status

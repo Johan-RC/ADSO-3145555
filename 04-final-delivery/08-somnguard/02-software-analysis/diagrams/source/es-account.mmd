@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> Pendiente: Registro de cuenta
+    Pendiente --> Activa: Validación de correo confirmada
+    Pendiente --> Eliminada: Validación caducada
+    Activa --> Suspendida: Administrador suspende
+    Suspendida --> Activa: Administrador reactiva
+    Activa --> Eliminada: Baja voluntaria o administrativa
+    Suspendida --> Eliminada
+    Eliminada --> [*]

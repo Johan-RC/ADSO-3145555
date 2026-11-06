@@ -64,13 +64,13 @@ Authors are the instructors and the apprentices listed in `team-roster.md`. Each
 | Field / Campo | Value / Valor |
 |---|---|
 | Title / Título de la obra | SomnGuard |
-| Year of creation / Año de creación | |
+| Year of creation / Año de creación | Por confirmar por el equipo; el historial Git observable empieza el 2026-04-29. |
 | Country of origin / País de origen | Colombia |
 | Version registered / Versión a registrar | `final-delivery-2026` |
-| Short description of its functions / Breve descripción de sus funciones | |
-| What sets it apart from similar software / Qué la diferencia de obras similares |  |
-| Programming languages / Lenguajes | |
-| Type: web, mobile, desktop, device / Tipo: web, móvil, escritorio, dispositivo | |
+| Short description of its functions / Breve descripción de sus funciones | Software que analiza señales visuales del conductor en el dispositivo edge para detectar indicios de somnolencia o fatiga, activar una alerta sonora local y sincronizar eventos y evidencias para consultarlos en el portal y la app. |
+| What sets it apart from similar software / Qué la diferencia de obras similares | Procesa la detección y alerta crítica en el dispositivo, incluso sin conectividad; cuando recupera conexión, sincroniza los eventos con una plataforma cloud para su consulta y gestión. |
+| Programming languages / Lenguajes | Java, TypeScript/JavaScript, Python y SQL. |
+| Type: web, mobile, desktop, device / Tipo: web (API y portal), móvil y dispositivo edge. |
 
 ## 6. Declarations / Declaraciones (art. 4 y art. 5, num. 5 y 6)
 
@@ -98,14 +98,25 @@ At least one is required. Attach all three. / Se exige al menos uno. Adjunte los
 
 ## 8. Third-party components / Componentes de terceros
 
-List code, libraries, models, images or data not created by the team. An unlisted copy puts the "original work" declaration at risk.
+**Preliminary inventory / Inventario preliminar.** The entries below were identified in the local repositories and manifests on 2026-11-05. This is not a complete software bill of materials: the team must verify the exact versions in the tagged release, transitive licenses, model-file terms, and any assets or datasets supplied outside Git before making the originality declaration.
 
-Relacione código, librerías, modelos, imágenes o datos que el equipo no creó. Una copia sin declarar pone en riesgo la declaración de obra original.
+Las entradas siguientes se identificaron en los repositorios y manifiestos locales el 2026-11-05. No constituyen un inventario completo de materiales: el equipo debe validar las versiones exactas de la entrega etiquetada, las licencias transitivas, los términos de los modelos y cualquier recurso o dataset que no esté en Git antes de declarar originalidad.
 
 | Component / Componente | Author or source / Autor o fuente | License / Licencia | Where it is used / Dónde se usa |
 |---|---|---|---|
-| | | | |
+| OpenCV Python (`opencv-python`) | OpenCV project; declared in [`somnguard-device/pyproject.toml`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/pyproject.toml) | Apache-2.0 in local package metadata; verify against the release environment | Camera frames and edge image processing. |
+| NumPy | NumPy project; declared in [`somnguard-device/pyproject.toml`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/pyproject.toml) | Local package metadata reports `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0`; preserve the package notices | Numerical operations in edge analysis. |
+| HTTPX | Encode project; declared in [`somnguard-device/pyproject.toml`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/pyproject.toml) | BSD-3-Clause in local package metadata; verify against the release environment | Device-to-API HTTP client. |
+| MediaPipe framework | Google AI Edge; [official MediaPipe repository and license](https://github.com/google-ai-edge/mediapipe) | Apache-2.0 for the framework code; this does not by itself establish the terms of each model file | Face landmarks and the object-detector API on the edge device. |
+| Face Landmarker model (`face_landmarker.task`) | Google MediaPipe model storage; download URL and use are recorded in [`scripts/download_models.py`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/scripts/download_models.py) and [`models/README.md`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/models/README.md) | Model-specific redistribution and attribution terms still require confirmation. The file is downloaded during setup and is not versioned in Git. | Facial landmarks used for eye, mouth, gaze, and head-movement analysis. |
+| EfficientDet-Lite0 TFLite model (`phone_detector.tflite`) | Google MediaPipe model storage; downloaded by [`scripts/download_models.py`](https://github.com/SomnGuard/somnguard-device/blob/final-delivery-2026/scripts/download_models.py) | Model-specific redistribution and attribution terms still require confirmation. The binary is not included in the tagged Git tree; the local copy is ignored by Git. | `PhoneDetector` object detection for the `cell phone` class. |
+| React, React Native, Expo, and LiveKit client libraries | Package manifests for the [mobile app](https://github.com/SomnGuard/somnguard-app/blob/final-delivery-2026/SomnGuard-app/package.json) and [portal](https://github.com/SomnGuard/somnguard-portal/blob/final-delivery-2026/package.json) | Installed package metadata includes MIT and Apache-2.0 packages; verify all direct and transitive notices against the release lockfiles | Web and mobile interfaces, navigation, video streaming, and WebRTC integration. |
+| Backend Maven runtime libraries (Spring Boot, PostgreSQL JDBC, Liquibase, Springdoc, Micrometer, Nimbus JOSE JWT, Google Auth, Logstash encoder, and MinIO client) | [`somnguard-api/pom.xml`](https://github.com/SomnGuard/somnguard-api/blob/final-delivery-2026/pom.xml) | Per-artifact and transitive license review is still required; the POM does not contain a complete license inventory | API, persistence, migrations, OpenAPI, metrics, JWT, push authentication, logging, and S3-compatible storage. |
+| Database and infrastructure images (PostgreSQL, Liquibase, S3Mock, LiveKit, coturn; production evidence also mentions SeaweedFS and Traefik) | [Database Compose/Dockerfile](https://github.com/SomnGuard/somnguard-db/tree/final-delivery-2026) and [deployment procedure](06-implementation-procedure/deployment-procedure.md) | Image-by-image license and version review remains open. The VPS Compose source is not present in the reviewed repositories. | Local database/migration tooling, object storage, streaming, and production routing. |
 
+The reviewed repositories did not reveal a version-controlled training dataset or separate audio files. This does not rule out material held outside Git. The final inventory must also check image/icon/font assets and the media used in the public videos.
+
+En los repositorios revisados no se encontró un dataset de entrenamiento ni archivos de audio versionados. Esto no descarta recursos guardados fuera de Git. El inventario final también debe revisar imágenes, iconos, fuentes y los medios usados en los videos públicos.
 ## 9. Private data / Datos privados
 
 **Do not write this data in this repository.** Registration also asks for address, nationality, phone and email. Each member gives them to the instructor through the private channel the instructor indicates.

@@ -1,0 +1,18 @@
+flowchart LR
+    A1[Plataforma Backend]
+    A2[Conductor]
+
+    subgraph Módulo de Operación y Datos
+        UC1([Inicializar Hardware y Cámara])
+        UC2([Pausar Monitoreo por Ausencia])
+        UC3([Almacenar Eventos Offline])
+        UC4([Sincronizar Datos con Servidor])
+        UC5([Liberar Almacenamiento Local])
+    end
+
+    A2 -.->|Abandona asiento| UC2
+    UC1 -.->|Falla| UC3
+    
+    UC3 -.->|<< include >>| UC4
+    UC4 ==>|Transmite JSON/Archivos| A1
+    UC4 -.->|<< include >>| UC5

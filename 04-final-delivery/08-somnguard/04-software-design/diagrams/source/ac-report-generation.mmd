@@ -1,0 +1,8 @@
+flowchart TD
+    A[Usuario solicita reporte: rango de fechas y dispositivo] --> B[Consultar eventos del período]
+    B --> C[Solicitar resumen descriptivo al servicio de IA]
+    C --> D[Compilar reporte: datos + resumen]
+    D --> E{¿Generación exitosa?}
+    E -- Sí --> F[Entregar descarga del reporte]
+    E -- No --> G[Registrar error y notificar al usuario]
+    G --> H[Permitir reintento]

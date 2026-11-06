@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant USR as Usuario (Web / App)
+    participant FRT as Frontend (React JS / React Native)
+    participant API as API Security
+    participant SVC as Servicio de Autenticación
+    participant DB as PostgreSQL
+
+    USR->>FRT: Ingresa credenciales
+    FRT->>API: POST /api/v1/auth/login
+    API->>SVC: Valida credenciales
+    SVC->>DB: Consulta usuario y hash de contraseña
+
+    alt Credenciales válidas
+        SVC->>SVC: Genera JWT (access + refresh)
+        SVC->>DB: Registra audit_login (éxito)
+        API-->>FRT: 200 (tokens)
+    else Credenciales inválidas
+        SVC->>DB: Registra audit_login (fallo)
+        API-->>FRT: 401 (error de autenticación)
+    end
+
+    FRT->>USR: Inicia sesión en la plataforma

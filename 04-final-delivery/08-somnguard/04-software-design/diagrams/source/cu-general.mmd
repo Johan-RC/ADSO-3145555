@@ -1,0 +1,23 @@
+flowchart LR
+    %% Actores
+    A1[Conductor]
+    A2[Usuario Plataforma]
+    A3[Admin Técnico]
+
+    %% Sistemas
+    subgraph SD [Dispositivo SomnGuard]
+        UC_D([Monitorear y Alertar Localmente])
+    end
+
+    subgraph SP [Plataforma Backend / Web / App]
+        UC_P([Analizar Datos y Gestionar Cuenta])
+    end
+
+    %% Relaciones
+    A1 -.->|Es monitoreado| UC_D
+    UC_D -.->|Alerta al| A1
+
+    UC_D ==>|Envía eventos y evidencia| UC_P
+
+    A2 -->|Consulta reportes y asocia dispositivo| UC_P
+    A3 -->|Administra sistema| UC_P

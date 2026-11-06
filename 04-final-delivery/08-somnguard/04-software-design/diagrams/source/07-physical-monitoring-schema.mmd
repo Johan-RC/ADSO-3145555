@@ -1,0 +1,47 @@
+---
+title: SomnGuard - Physical schema monitoring (snapshot 2026-11-06)
+---
+
+erDiagram
+    %% Snapshot of the local PostgreSQL schema. External tables are key-only context.
+    %% Full table definitions and non-key columns remain in the Liquibase SQL files.
+
+    MONITORING__DEVICE_TOKEN {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    MONITORING__NOTIFICATION {
+        UUID id PK
+        UUID alert_log_id FK
+        UUID template_id FK
+        UUID user_id FK
+    }
+
+    MONITORING__NOTIFICATION_STATUS_AUDIT {
+        INT8 id PK
+        UUID notification_id FK
+    }
+
+    MONITORING__NOTIFICATION_TEMPLATE {
+        UUID id PK
+    }
+
+    MONITORING__USER_NOTIFICATION_PREFERENCE {
+        UUID user_id PK,FK
+    }
+
+    SECURITY__USER {
+        UUID id PK
+    }
+
+    TELEMETRY_SERVICE__ALERT_LOG {
+        UUID id PK
+    }
+
+    SECURITY__USER ||--o{ MONITORING__DEVICE_TOKEN : user_id
+    TELEMETRY_SERVICE__ALERT_LOG ||--o{ MONITORING__NOTIFICATION : alert_log_id
+    MONITORING__NOTIFICATION_TEMPLATE o|--o{ MONITORING__NOTIFICATION : template_id
+    SECURITY__USER ||--o{ MONITORING__NOTIFICATION : user_id
+    MONITORING__NOTIFICATION ||--o{ MONITORING__NOTIFICATION_STATUS_AUDIT : notification_id
+    SECURITY__USER ||--o| MONITORING__USER_NOTIFICATION_PREFERENCE : user_id

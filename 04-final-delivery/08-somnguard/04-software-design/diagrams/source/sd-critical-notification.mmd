@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant TEL as Telemetry Service
+    participant MON as Módulo Monitoring
+    participant DB as PostgreSQL
+    participant PUSH as Servicio Push (FCM / APNs)
+    participant APP as App Móvil / Portal Web
+
+    TEL->>MON: Publica evento crítico persistido
+    MON->>MON: Evalúa severidad y destinatarios (cuenta propietaria)
+    MON->>DB: Crea notification (estado: no leída)
+    MON->>PUSH: Envía notificación push
+    PUSH-->>APP: Entrega en el dispositivo del usuario
+    APP->>MON: POST /api/v1/notifications/{id}/read
+    MON->>DB: Actualiza estado de la notificación

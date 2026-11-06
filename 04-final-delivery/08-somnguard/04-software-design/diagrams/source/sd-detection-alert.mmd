@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant CAM as Cámara (Edge)
+    participant VIS as Análisis de Visión (Python)
+    participant DET as Detector de Riesgo
+    participant SPK as Altavoz
+    participant CON as Conductor
+    participant REG as Registro Local (Edge)
+
+    CAM->>VIS: Frames capturados del conductor
+    VIS->>VIS: Preprocesa y analiza señales (parpadeo, PERCLOS, cabeza)
+    VIS-->>DET: Características extraídas
+    DET->>DET: Evalúa patrón de fatiga / somnolencia
+
+alt Riesgo detectado
+    DET->>SPK: Activa alerta sonora (patrón configurado)
+    DET->>REG: Registra evento + evidencia (imagen/video)
+else Sin riesgo
+    DET->>REG: Continúa monitoreo sin registrar
+end
+
+    SPK-->>CON: Alerta acústica inmediata

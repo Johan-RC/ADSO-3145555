@@ -1,0 +1,10 @@
+flowchart TD
+    A[Capturar frames de la cámara] --> B[Preprocesar imagen]
+    B --> C[Analizar señales: parpadeo, PERCLOS, movimientos de cabeza]
+    C --> D{Riesgo detectado?}
+    D -- No --> A
+    D -- Sí --> E[Reproducir alerta sonora]
+    E --> F[Registrar evento local]
+    F --> G[Adjuntar evidencia multimedia]
+    G --> H[Encolar para sincronización]
+    H --> A

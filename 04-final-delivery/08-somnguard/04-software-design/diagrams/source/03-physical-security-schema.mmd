@@ -1,0 +1,74 @@
+---
+title: SomnGuard - Physical schema security (snapshot 2026-11-06)
+---
+
+erDiagram
+    %% Snapshot of the local PostgreSQL schema. External tables are key-only context.
+    %% Full table definitions and non-key columns remain in the Liquibase SQL files.
+
+    SECURITY__AUDIT_LOGIN {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__EMAIL_VERIFICATION {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__FEATURE {
+        UUID id PK
+        UUID module_id FK
+    }
+
+    SECURITY__MODULE {
+        UUID id PK
+    }
+
+    SECURITY__PASSWORD_RESET_REQUEST {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__REFRESH_TOKEN {
+        UUID id PK
+        UUID replaced_by FK
+        UUID user_id FK
+    }
+
+    SECURITY__ROLE {
+        UUID id PK
+    }
+
+    SECURITY__ROLE_FEATURE {
+        UUID id PK
+        UUID feature_id FK
+        UUID role_id FK
+    }
+
+    SECURITY__USER {
+        UUID id PK
+    }
+
+    SECURITY__USER_ROLE {
+        UUID id PK
+        UUID role_id FK
+        UUID user_id FK
+    }
+
+    SECURITY__USER_STATUS_AUDIT {
+        INT8 id PK
+        UUID user_id FK
+    }
+
+    SECURITY__USER o|--o{ SECURITY__AUDIT_LOGIN : user_id
+    SECURITY__USER ||--o{ SECURITY__EMAIL_VERIFICATION : user_id
+    SECURITY__MODULE ||--o{ SECURITY__FEATURE : module_id
+    SECURITY__USER ||--o{ SECURITY__PASSWORD_RESET_REQUEST : user_id
+    SECURITY__REFRESH_TOKEN o|--o{ SECURITY__REFRESH_TOKEN : replaced_by
+    SECURITY__USER ||--o{ SECURITY__REFRESH_TOKEN : user_id
+    SECURITY__FEATURE ||--o{ SECURITY__ROLE_FEATURE : feature_id
+    SECURITY__ROLE ||--o{ SECURITY__ROLE_FEATURE : role_id
+    SECURITY__ROLE ||--o{ SECURITY__USER_ROLE : role_id
+    SECURITY__USER ||--o{ SECURITY__USER_ROLE : user_id
+    SECURITY__USER ||--o{ SECURITY__USER_STATUS_AUDIT : user_id

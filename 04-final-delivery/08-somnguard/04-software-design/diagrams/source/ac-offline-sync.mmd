@@ -1,0 +1,9 @@
+flowchart TD
+    A[Cola local con eventos pendientes] --> B{¿Hay conectividad?}
+    B -- No --> A
+    B -- Sí --> C[Enviar lote a la API con API key]
+    C --> D{¿API confirma 201?}
+    D -- No --> A
+    D -- Sí --> E[Eliminar eventos confirmados de la cola]
+    E --> F[Descargar configuración básica del dispositivo]
+    F --> G[Aplicar configuración local]

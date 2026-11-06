@@ -1,0 +1,21 @@
+flowchart LR
+    A1[Usuario Plataforma]
+    A2[Dispositivo]
+
+    subgraph Módulo Analítico
+        UC1([Consultar Línea de Tiempo de Eventos])
+        UC2([Reproducir Evidencia Multimedia])
+        UC3([Ver Métricas de Comportamiento])
+        UC4([Generar Resumen Descriptivo con IA])
+        UC5([Descargar Reporte Consolidado])
+        UC6([Recibir Notificación Crítica In-App])
+    end
+
+    A1 --> UC1
+    A1 --> UC2
+    A1 --> UC3
+    A1 --> UC4
+    A1 --> UC5
+    UC6 -->|Lee Notificación| A1
+
+    A2 -->|Dispara Evento Crítico| UC6

@@ -1,0 +1,66 @@
+---
+title: SomnGuard - Physical schema telemetry_service (snapshot 2026-11-06)
+---
+
+erDiagram
+    %% Snapshot of the local PostgreSQL schema. External tables are key-only context.
+    %% Full table definitions and non-key columns remain in the Liquibase SQL files.
+
+    DEVICE_MANAGEMENT__DEVICE {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__EVENT_TYPE {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__MEDIA_TYPE {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SEVERITY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SOUND_PATTERN {
+        UUID id PK
+    }
+
+    TELEMETRY_SERVICE__ALERT_LOG {
+        UUID id PK
+        UUID device_id FK
+        UUID event_id FK
+        UUID severity_id FK
+        UUID sound_pattern_id FK
+    }
+
+    TELEMETRY_SERVICE__EVENT {
+        UUID id PK
+        UUID device_id FK
+        UUID event_type_id FK
+        UUID severity_id FK
+        UUID sound_pattern_id FK
+    }
+
+    TELEMETRY_SERVICE__EVENT_STATUS_AUDIT {
+        INT8 id PK
+        UUID event_id FK
+    }
+
+    TELEMETRY_SERVICE__EVIDENCE {
+        UUID id PK
+        UUID event_id FK
+        UUID media_type_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE ||--o{ TELEMETRY_SERVICE__ALERT_LOG : device_id
+    TELEMETRY_SERVICE__EVENT ||--o{ TELEMETRY_SERVICE__ALERT_LOG : event_id
+    PARAMETERIZATION__SEVERITY ||--o{ TELEMETRY_SERVICE__ALERT_LOG : severity_id
+    PARAMETERIZATION__SOUND_PATTERN ||--o{ TELEMETRY_SERVICE__ALERT_LOG : sound_pattern_id
+    DEVICE_MANAGEMENT__DEVICE ||--o{ TELEMETRY_SERVICE__EVENT : device_id
+    PARAMETERIZATION__EVENT_TYPE ||--o{ TELEMETRY_SERVICE__EVENT : event_type_id
+    PARAMETERIZATION__SEVERITY ||--o{ TELEMETRY_SERVICE__EVENT : severity_id
+    PARAMETERIZATION__SOUND_PATTERN o|--o{ TELEMETRY_SERVICE__EVENT : sound_pattern_id
+    TELEMETRY_SERVICE__EVENT ||--o{ TELEMETRY_SERVICE__EVENT_STATUS_AUDIT : event_id
+    TELEMETRY_SERVICE__EVENT ||--o| TELEMETRY_SERVICE__EVIDENCE : event_id
+    PARAMETERIZATION__MEDIA_TYPE ||--o{ TELEMETRY_SERVICE__EVIDENCE : media_type_id

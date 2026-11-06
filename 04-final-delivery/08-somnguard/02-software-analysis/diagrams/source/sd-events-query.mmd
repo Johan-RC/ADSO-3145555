@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant USR as Usuario Plataforma
+    participant WEB as Portal Web / App Móvil
+    participant API as API Telemetry Service
+    participant DB as PostgreSQL
+    participant STO as Almacenamiento Multimedia
+
+    USR->>WEB: Aplica filtros (dispositivo, fechas, severidad, tipo)
+    WEB->>API: GET /api/v1/events (filtros + paginación)
+    API->>DB: Consulta eventos mediante especificaciones
+    DB-->>API: Lista de eventos
+    API-->>WEB: 200 (eventos paginados)
+    WEB->>USR: Renderiza línea de tiempo
+    USR->>WEB: Selecciona evento y su evidencia
+    WEB->>API: GET /api/v1/events/{id}
+    WEB->>API: GET /api/v1/events/{id}/evidence
+    API->>STO: Obtiene recurso multimedia
+    API-->>WEB: Detalle del evento + URL firmada de evidencia

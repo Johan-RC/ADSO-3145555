@@ -1,0 +1,21 @@
+flowchart LR
+    A1[Usuario]
+    A2[Dispositivo]
+    A3[Admin Técnico]
+
+    subgraph Plataforma
+        UC1([Gestión de Identidad y Cuenta])
+        UC2([Gestión de Dispositivos Asociados])
+        UC3([Recepción de Telemetría y Evidencia])
+        UC4([Visualización y Analítica de Datos])
+    end
+
+    A1 --> UC1
+    A1 --> UC2
+    A1 --> UC4
+    
+    A3 --> UC2
+    A3 --> UC4
+
+    A2 ==>|Envía JSON/Multimedia| UC3
+    UC3 -.->|Alimenta| UC4

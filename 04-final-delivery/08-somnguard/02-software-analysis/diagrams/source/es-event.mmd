@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> Detectado: Análisis de visión identifica un riesgo
+    Detectado --> Registrado: Alerta emitida y evento guardado en cola local
+    Registrado --> Sincronizado: Lote confirmado por la API
+    Registrado --> Registrado: Sin conectividad (permanece en cola)
+    Sincronizado --> Analizado: Consultado en la plataforma o incluido en reporte
+    Analizado --> Archivado: Política de retención cumplida
+    Archivado --> [*]

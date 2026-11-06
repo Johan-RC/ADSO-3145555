@@ -1,0 +1,219 @@
+---
+title: SomnGuard - Modelo Relacional
+---
+
+erDiagram
+
+    %% =========================
+    %% SECURITY
+    %% =========================
+
+    USER {
+        UUID id PK
+        VARCHAR email
+        TEXT password_hash
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR phone
+    }
+
+    ROLE {
+        UUID id PK
+        VARCHAR name
+        TEXT description
+    }
+
+    MODULE {
+        UUID id PK
+        VARCHAR code
+        VARCHAR name
+        TEXT description
+    }
+
+    FEATURE {
+        UUID id PK
+        UUID module_id FK
+        VARCHAR code
+        VARCHAR name
+        TEXT description
+    }
+
+    ROLE_FEATURE {
+        UUID id PK
+        UUID role_id FK
+        UUID feature_id FK
+    }
+
+    USER_ROLE {
+        UUID id PK
+        UUID user_id FK
+        UUID role_id FK
+        TIMESTAMPTZ assigned_at
+        TIMESTAMPTZ expires_at
+    }
+
+    PASSWORD_RESET_REQUEST {
+        UUID id PK
+        UUID user_id FK
+        TEXT token_hash
+        TIMESTAMPTZ expires_at
+        BOOLEAN is_used
+    }
+
+    AUDIT_LOGIN {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR email_attempted
+        VARCHAR outcome
+        VARCHAR ip_address
+        TEXT user_agent
+        TIMESTAMPTZ attempted_at
+        BOOLEAN is_active
+    }
+
+    %% =========================
+    %% PARAMETERIZATION
+    %% =========================
+
+    EVENT_CATEGORY {
+        UUID id PK
+        VARCHAR code
+        VARCHAR name
+        TEXT description
+    }
+
+    SEVERITY {
+        UUID id PK
+        VARCHAR code
+        VARCHAR name
+        SMALLINT priority
+    }
+
+    MEDIA_TYPE {
+        UUID id PK
+        VARCHAR code
+        VARCHAR name
+    }
+
+    SOUND_PATTERN {
+        UUID id PK
+        VARCHAR code
+        TEXT description
+        INTEGER frequency_hz
+        INTEGER duration_ms
+    }
+
+    EVENT_TYPE {
+        UUID id PK
+        VARCHAR code
+        VARCHAR name
+        UUID event_category_id FK
+        UUID default_severity_id FK
+        UUID default_sound_pattern_id FK
+    }
+
+    %% =========================
+    %% DEVICE MANAGEMENT
+    %% =========================
+
+    DEVICE {
+        UUID id PK
+        VARCHAR serial_number
+        TEXT api_key_hash
+        VARCHAR firmware_version
+    }
+
+    DEVICE_ASSIGNMENT {
+        UUID id PK
+        UUID device_id FK
+        UUID user_id FK
+        TIMESTAMPTZ assigned_at
+        TIMESTAMPTZ unassigned_at
+    }
+
+    DEVICE_CONFIG {
+        UUID id PK
+        UUID device_id FK
+        JSONB configuration
+    }
+
+    %% =========================
+    %% TELEMETRY
+    %% =========================
+
+    EVENT {
+        UUID id PK
+        UUID device_id FK
+        UUID event_type_id FK
+        TIMESTAMPTZ occurred_at
+        UUID severity_id FK
+        UUID sound_pattern_id FK
+        JSONB metadata
+        BOOLEAN is_offline_sync
+        VARCHAR status
+    }
+
+    EVIDENCE {
+        UUID id PK
+        UUID event_id FK
+        UUID media_type_id FK
+        VARCHAR minio_key
+        BIGINT size_bytes
+        VARCHAR checksum_sha256
+        UUID created_by FK
+        BOOLEAN is_active
+    }
+
+    ALERT_LOG {
+        UUID id PK
+        UUID event_id FK
+        UUID sound_pattern_id FK
+        UUID severity_id FK
+        TIMESTAMPTZ triggered_at
+        UUID device_id FK
+        UUID created_by FK
+        BOOLEAN is_active
+    }
+
+    %% =========================
+    %% MONITORING
+    %% =========================
+
+    NOTIFICATION {
+        UUID id PK
+        UUID user_id FK
+        UUID alert_log_id FK
+        VARCHAR title
+        TEXT message
+        VARCHAR channel
+        TIMESTAMPTZ sent_at
+        TIMESTAMPTZ read_at
+    }
+
+    %% =========================
+    %% RELATIONSHIPS
+    %% =========================
+
+    MODULE ||--o{ FEATURE : contains
+    ROLE ||--o{ ROLE_FEATURE : grants
+    FEATURE ||--o{ ROLE_FEATURE : assigned_to
+    USER ||--o{ USER_ROLE : has
+    ROLE ||--o{ USER_ROLE : assigned
+    USER ||--o{ PASSWORD_RESET_REQUEST : requests
+    USER ||--o{ AUDIT_LOGIN : generates
+    EVENT_CATEGORY ||--o{ EVENT_TYPE : classifies
+    SEVERITY ||--o{ EVENT_TYPE : default_severity
+    SOUND_PATTERN ||--o{ EVENT_TYPE : default_sound
+    DEVICE ||--o{ DEVICE_ASSIGNMENT : assigned
+    USER ||--o{ DEVICE_ASSIGNMENT : receives
+    DEVICE ||--o| DEVICE_CONFIG : configured
+    DEVICE ||--o{ EVENT : generates
+    EVENT_TYPE ||--o{ EVENT : type
+    EVENT ||--o| EVIDENCE : has
+    MEDIA_TYPE ||--o{ EVIDENCE : format
+    EVENT ||--o{ ALERT_LOG : triggers
+    SOUND_PATTERN ||--o{ ALERT_LOG : plays
+    SEVERITY ||--o{ ALERT_LOG : severity
+    USER ||--o{ NOTIFICATION : receives
+    ALERT_LOG ||--o{ NOTIFICATION : causes
+

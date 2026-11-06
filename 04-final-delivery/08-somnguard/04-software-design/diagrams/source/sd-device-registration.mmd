@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant ADM as Usuario / Administrador
+    participant WEB as Portal Web
+    participant API as API Device Management
+    participant DB as PostgreSQL
+    participant DEV as Dispositivo SomnGuard
+    participant USR as Usuario Final
+
+    %% Vía A: alta manual (convive con auto-registro)
+    ADM->>WEB: Registra dispositivo (serial, modelo)
+    WEB->>API: POST /api/v1/devices
+    API->>DB: Crea device (estado: REGISTERED/Registrado)
+    API-->>WEB: 201 (id + API key una sola vez)
+    ADM->>WEB: Asigna dispositivo a su cuenta
+    WEB->>API: POST /api/v1/devices/{id}/assign
+    API->>DB: Crea device_assignment
+    API->>DB: Inicializa device_config (sonido, sensibilidad)
+    API-->>WEB: 200 (asignación confirmada, estado: ASSIGNED/Asignado)
+
+    %% Vía B: auto-registro con provisioning token (ADR-010)
+    ADM->>API: POST /api/v1/devices/provisioning-tokens (admin + device.provision)
+    API-->>ADM: 201 (token en claro una sola vez)
+    DEV->>API: POST /api/v1/devices/self-register (X-Provision-Token + Idempotency-Key, serial+firmware)
+    API->>DB: Valida token, crea device REGISTERED + API Key + claim_code, consume token, audita
+    API-->>DEV: 201 (device_id + api_key + claim_code, una sola vez)
+    Note over DEV: Reintento mismo token+serial → 200 sin reexponer key
+    USR->>API: POST /api/v1/devices/claim (JWT + claim_code público)
+    API->>DB: Crea device_assignment, marca claimed (REGISTERED->ASSIGNED)
+    API-->>USR: 200 (dispositivo reclamado)
+    Note over API,DB: Claim 409 si asignado; unassign libera y el mismo código re-sirve
+
+    DEV->>API: POST /api/v1/devices/{id}/heartbeat (X-Device-ID + X-API-Key, primera conexión/saludo)
+    API->>DB: Actualiza last_heartbeat_at, last_seen_ip (ASSIGNED->ACTIVE/Activo)
+    API-->>DEV: 204 (saludo OK, device ya puede enviar telemetría)
+    DEV->>API: GET /api/v1/devices/{id}/config (primera conexión)
+    API-->>DEV: Configuración básica (merge defaults + overrides)

@@ -1,0 +1,246 @@
+---
+title: SomnGuard - Physical database model snapshot 2026-11-06
+---
+
+erDiagram
+    %% Live local PostgreSQL physical schema. Metadata tables in public are excluded.
+    %% Only PK/FK columns are shown; full DDL remains in the tagged Liquibase repository.
+
+    DEVICE_MANAGEMENT__DEVICE {
+        UUID id PK
+        UUID provisioning_token_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT {
+        UUID id PK
+        UUID device_id FK
+        UUID user_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG {
+        UUID id PK
+        UUID device_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG_HISTORY {
+        UUID id PK
+        UUID device_config_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG_STATUS_AUDIT {
+        INT8 id PK
+        UUID device_config_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT {
+        UUID id PK
+        UUID device_id FK
+        UUID token_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN {
+        UUID id PK
+        UUID device_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_STATUS_AUDIT {
+        INT8 id PK
+        UUID device_id FK
+    }
+
+    MONITORING__DEVICE_TOKEN {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    MONITORING__NOTIFICATION {
+        UUID id PK
+        UUID alert_log_id FK
+        UUID template_id FK
+        UUID user_id FK
+    }
+
+    MONITORING__NOTIFICATION_STATUS_AUDIT {
+        INT8 id PK
+        UUID notification_id FK
+    }
+
+    MONITORING__NOTIFICATION_TEMPLATE {
+        UUID id PK
+    }
+
+    MONITORING__USER_NOTIFICATION_PREFERENCE {
+        UUID user_id PK,FK
+    }
+
+    PARAMETERIZATION__EVENT_CATEGORY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__EVENT_TYPE {
+        UUID id PK
+        UUID default_severity_id FK
+        UUID default_sound_pattern_id FK
+        UUID event_category_id FK
+    }
+
+    PARAMETERIZATION__GLOBAL_CONFIG {
+        INT2 id PK
+    }
+
+    PARAMETERIZATION__GLOBAL_CONFIG_HISTORY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__MEDIA_TYPE {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SEVERITY {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__SOUND_PATTERN {
+        UUID id PK
+    }
+
+    PARAMETERIZATION__STATUS {
+        VARCHAR code PK
+        VARCHAR status_category FK
+    }
+
+    PARAMETERIZATION__STATUS_CATEGORY {
+        VARCHAR code PK
+    }
+
+    PARAMETERIZATION__STATUS_TRANSITION {
+        VARCHAR from_status PK,FK
+        VARCHAR to_status PK,FK
+    }
+
+    SECURITY__AUDIT_LOGIN {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__EMAIL_VERIFICATION {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__FEATURE {
+        UUID id PK
+        UUID module_id FK
+    }
+
+    SECURITY__MODULE {
+        UUID id PK
+    }
+
+    SECURITY__PASSWORD_RESET_REQUEST {
+        UUID id PK
+        UUID user_id FK
+    }
+
+    SECURITY__REFRESH_TOKEN {
+        UUID id PK
+        UUID replaced_by FK
+        UUID user_id FK
+    }
+
+    SECURITY__ROLE {
+        UUID id PK
+    }
+
+    SECURITY__ROLE_FEATURE {
+        UUID id PK
+        UUID feature_id FK
+        UUID role_id FK
+    }
+
+    SECURITY__USER {
+        UUID id PK
+    }
+
+    SECURITY__USER_ROLE {
+        UUID id PK
+        UUID role_id FK
+        UUID user_id FK
+    }
+
+    SECURITY__USER_STATUS_AUDIT {
+        INT8 id PK
+        UUID user_id FK
+    }
+
+    TELEMETRY_SERVICE__ALERT_LOG {
+        UUID id PK
+        UUID device_id FK
+        UUID event_id FK
+        UUID severity_id FK
+        UUID sound_pattern_id FK
+    }
+
+    TELEMETRY_SERVICE__EVENT {
+        UUID id PK
+        UUID device_id FK
+        UUID event_type_id FK
+        UUID severity_id FK
+        UUID sound_pattern_id FK
+    }
+
+    TELEMETRY_SERVICE__EVENT_STATUS_AUDIT {
+        INT8 id PK
+        UUID event_id FK
+    }
+
+    TELEMETRY_SERVICE__EVIDENCE {
+        UUID id PK
+        UUID event_id FK
+        UUID media_type_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN o|--o{ DEVICE_MANAGEMENT__DEVICE : fk_device_provisioning_token
+    DEVICE_MANAGEMENT__DEVICE ||--o| DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT : fk_device_assignment_device
+    SECURITY__USER ||--o| DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT : fk_device_assignment_user
+    DEVICE_MANAGEMENT__DEVICE ||--o| DEVICE_MANAGEMENT__DEVICE_CONFIG : fk_device_config_device
+    DEVICE_MANAGEMENT__DEVICE_CONFIG ||--o{ DEVICE_MANAGEMENT__DEVICE_CONFIG_HISTORY : fk_device_config_history_config
+    DEVICE_MANAGEMENT__DEVICE_CONFIG ||--o{ DEVICE_MANAGEMENT__DEVICE_CONFIG_STATUS_AUDIT : fk_device_config_status_audit_config
+    DEVICE_MANAGEMENT__DEVICE o|--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT : fk_provisioning_audit_device
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN ||--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT : fk_provisioning_audit_token
+    DEVICE_MANAGEMENT__DEVICE o|--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN : fk_provisioning_token_device
+    DEVICE_MANAGEMENT__DEVICE ||--o{ DEVICE_MANAGEMENT__DEVICE_STATUS_AUDIT : fk_device_status_audit_device
+    SECURITY__USER ||--o{ MONITORING__DEVICE_TOKEN : fk_device_token_user
+    TELEMETRY_SERVICE__ALERT_LOG ||--o{ MONITORING__NOTIFICATION : fk_notification_alert_log
+    MONITORING__NOTIFICATION_TEMPLATE o|--o{ MONITORING__NOTIFICATION : fk_notification_template
+    SECURITY__USER ||--o{ MONITORING__NOTIFICATION : fk_notification_user
+    MONITORING__NOTIFICATION ||--o{ MONITORING__NOTIFICATION_STATUS_AUDIT : fk_notification_status_audit_notification
+    SECURITY__USER ||--o| MONITORING__USER_NOTIFICATION_PREFERENCE : fk_user_notification_preference_user
+    PARAMETERIZATION__EVENT_CATEGORY ||--o{ PARAMETERIZATION__EVENT_TYPE : fk_event_type_category
+    PARAMETERIZATION__SEVERITY ||--o{ PARAMETERIZATION__EVENT_TYPE : fk_event_type_severity
+    PARAMETERIZATION__SOUND_PATTERN ||--o{ PARAMETERIZATION__EVENT_TYPE : fk_event_type_sound_pattern
+    PARAMETERIZATION__STATUS_CATEGORY ||--o{ PARAMETERIZATION__STATUS : fk_status_status_category
+    PARAMETERIZATION__STATUS ||--o{ PARAMETERIZATION__STATUS_TRANSITION : fk_status_transition_from_status
+    PARAMETERIZATION__STATUS ||--o{ PARAMETERIZATION__STATUS_TRANSITION : fk_status_transition_to_status
+    SECURITY__USER o|--o{ SECURITY__AUDIT_LOGIN : fk_audit_login_user
+    SECURITY__USER ||--o{ SECURITY__EMAIL_VERIFICATION : fk_email_verification_user
+    SECURITY__MODULE ||--o{ SECURITY__FEATURE : fk_feature_module
+    SECURITY__USER ||--o{ SECURITY__PASSWORD_RESET_REQUEST : fk_password_reset_request_user
+    SECURITY__REFRESH_TOKEN o|--o{ SECURITY__REFRESH_TOKEN : fk_refresh_token_replaced_by
+    SECURITY__USER ||--o{ SECURITY__REFRESH_TOKEN : fk_refresh_token_user
+    SECURITY__FEATURE ||--o{ SECURITY__ROLE_FEATURE : fk_role_feature_feature
+    SECURITY__ROLE ||--o{ SECURITY__ROLE_FEATURE : fk_role_feature_role
+    SECURITY__ROLE ||--o{ SECURITY__USER_ROLE : fk_user_role_role
+    SECURITY__USER ||--o{ SECURITY__USER_ROLE : fk_user_role_user
+    SECURITY__USER ||--o{ SECURITY__USER_STATUS_AUDIT : fk_user_status_audit_user
+    DEVICE_MANAGEMENT__DEVICE ||--o{ TELEMETRY_SERVICE__ALERT_LOG : fk_alert_log_device
+    TELEMETRY_SERVICE__EVENT ||--o{ TELEMETRY_SERVICE__ALERT_LOG : fk_alert_log_event
+    PARAMETERIZATION__SEVERITY ||--o{ TELEMETRY_SERVICE__ALERT_LOG : fk_alert_log_severity
+    PARAMETERIZATION__SOUND_PATTERN ||--o{ TELEMETRY_SERVICE__ALERT_LOG : fk_alert_log_sound_pattern
+    DEVICE_MANAGEMENT__DEVICE ||--o{ TELEMETRY_SERVICE__EVENT : fk_event_device
+    PARAMETERIZATION__EVENT_TYPE ||--o{ TELEMETRY_SERVICE__EVENT : fk_event_event_type
+    PARAMETERIZATION__SEVERITY ||--o{ TELEMETRY_SERVICE__EVENT : fk_event_severity
+    PARAMETERIZATION__SOUND_PATTERN o|--o{ TELEMETRY_SERVICE__EVENT : fk_event_sound_pattern
+    TELEMETRY_SERVICE__EVENT ||--o{ TELEMETRY_SERVICE__EVENT_STATUS_AUDIT : fk_event_status_audit_event
+    TELEMETRY_SERVICE__EVENT ||--o| TELEMETRY_SERVICE__EVIDENCE : fk_evidence_event
+    PARAMETERIZATION__MEDIA_TYPE ||--o{ TELEMETRY_SERVICE__EVIDENCE : fk_evidence_media_type

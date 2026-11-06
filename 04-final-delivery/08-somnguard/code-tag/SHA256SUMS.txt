@@ -1,1 +1,13 @@
-# sha256  file / archivo
+# SHA-256  filename
+a7513df9e20fbc65a8c008523ac1f1e67ec387ec2896571506b78078b9d73c39  somnguard-api-final-delivery-2026-main.zip
+1edebed8bc931be5fe7ad71edb2f075a85dc77c9165d9621fda6d90b6faa7b31  somnguard-api-full-export.zip
+88de4dc6f952341f6afffabee97027733c4f016e6ff5bb10c44f5e1d96f3139d  somnguard-app-final-delivery-2026-main.zip
+cb73406bb39e966400931fb421ced3b35f9f11c8dc3aa4ef4ccceb643af72c4a  somnguard-app-full-export.zip
+d82cc043ed4f66adaf270414456849ce7c2796271dac4e8d00dea8cb5be4331f  somnguard-db-final-delivery-2026-main.zip
+7ab0461673267812ad1686151c8b81770173e506ee97aa939a8936c061f0a07c  somnguard-db-full-export.zip
+ea39bfb51580240e3ea46b1aed5a1a5c57d72d6b2fa257d1303b9c452a432378  somnguard-device-final-delivery-2026-main.zip
+c4f539373db2e3352f023ca213c6f9e65573d9726d8799c5d1d2857b81e67b2c  somnguard-device-full-export.zip
+d8f803cc295dc6458387c7e7c9d49dcd0f924946b35210c3b6f48d6d2d019f62  somnguard-docs-final-delivery-2026-main.zip
+d8c6cb7cfcc1d727acfa2046e9b96e2ebe782dc7b737c0ac4ccdc20ce29635ff  somnguard-docs-full-export.zip
+a5468626bf8307d90b80c6d619d3c8096a3ce67c88dcd7d1cc7f55f9fa7e9bb0  somnguard-portal-final-delivery-2026-main.zip
+9c50a04dfc6d939996588292559aaf3c735faec3a93ff0a71837942ab061e1aa  somnguard-portal-full-export.zip

@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant USR as Usuario Plataforma
+    participant WEB as Portal Web
+    participant API as API Módulo Analítico
+    participant IA as Servicio de Resumen IA
+    participant DB as PostgreSQL
+    participant PDF as Generador de Reportes
+
+    USR->>WEB: Solicita reporte consolidado (rango, dispositivo)
+    WEB->>API: POST /api/v1/analytics/reports (solicita generación; propuesta, async 202)
+    API->>DB: Consulta eventos del período
+    API->>IA: Solicita resumen descriptivo
+    IA-->>API: Resumen generado
+    API->>PDF: Compila reporte (datos + resumen)
+    API-->>WEB: 202 (reporte en proceso) / 200 (descarga)
+    WEB->>USR: Descarga del reporte (PDF)

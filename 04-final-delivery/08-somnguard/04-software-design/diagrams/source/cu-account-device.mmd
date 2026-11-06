@@ -1,0 +1,18 @@
+flowchart LR
+    A1[Usuario Plataforma]
+
+    subgraph Módulo de Usuarios
+        UC1([Registrar y Validar Cuenta])
+        UC2([Iniciar / Cerrar Sesión])
+        UC3([Asociar Dispositivo])
+        UC4([Desasociar Dispositivo])
+        UC5([Eliminar Cuenta con Retención])
+    end
+
+    A1 --> UC1
+    A1 --> UC2
+    A1 --> UC3
+    A1 --> UC4
+    A1 --> UC5
+
+    UC3 -.->|<< requiere >>| UC2

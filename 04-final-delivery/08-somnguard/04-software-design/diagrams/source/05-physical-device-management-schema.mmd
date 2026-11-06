@@ -1,0 +1,64 @@
+---
+title: SomnGuard - Physical schema device_management (snapshot 2026-11-06)
+---
+
+erDiagram
+    %% Snapshot of the local PostgreSQL schema. External tables are key-only context.
+    %% Full table definitions and non-key columns remain in the Liquibase SQL files.
+
+    DEVICE_MANAGEMENT__DEVICE {
+        UUID id PK
+        UUID provisioning_token_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT {
+        UUID id PK
+        UUID device_id FK
+        UUID user_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG {
+        UUID id PK
+        UUID device_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG_HISTORY {
+        UUID id PK
+        UUID device_config_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_CONFIG_STATUS_AUDIT {
+        INT8 id PK
+        UUID device_config_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT {
+        UUID id PK
+        UUID device_id FK
+        UUID token_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN {
+        UUID id PK
+        UUID device_id FK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_STATUS_AUDIT {
+        INT8 id PK
+        UUID device_id FK
+    }
+
+    SECURITY__USER {
+        UUID id PK
+    }
+
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN o|--o{ DEVICE_MANAGEMENT__DEVICE : provisioning_token_id
+    DEVICE_MANAGEMENT__DEVICE ||--o| DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT : device_id
+    SECURITY__USER ||--o| DEVICE_MANAGEMENT__DEVICE_ASSIGNMENT : user_id
+    DEVICE_MANAGEMENT__DEVICE ||--o| DEVICE_MANAGEMENT__DEVICE_CONFIG : device_id
+    DEVICE_MANAGEMENT__DEVICE_CONFIG ||--o{ DEVICE_MANAGEMENT__DEVICE_CONFIG_HISTORY : device_config_id
+    DEVICE_MANAGEMENT__DEVICE_CONFIG ||--o{ DEVICE_MANAGEMENT__DEVICE_CONFIG_STATUS_AUDIT : device_config_id
+    DEVICE_MANAGEMENT__DEVICE o|--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT : device_id
+    DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN ||--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_AUDIT : token_id
+    DEVICE_MANAGEMENT__DEVICE o|--o{ DEVICE_MANAGEMENT__DEVICE_PROVISIONING_TOKEN : device_id
+    DEVICE_MANAGEMENT__DEVICE ||--o{ DEVICE_MANAGEMENT__DEVICE_STATUS_AUDIT : device_id
