@@ -27,7 +27,7 @@ Los aprendices completan su rol, por ejemplo backend, frontend, base de datos, Q
 
 | Full name / Nombre completo | Doc. type / Tipo | Doc. number / Número | Ficha | GitHub user / Usuario | Role in the project / Rol en el proyecto | Author / Autor |
 |---|---|---|---|---|---|---|
-| JUAN CARLOS JURADO CASTAÑEDA | CC | 1077224670 | 3145555 | JuanCarlosJC-20 | | Yes / Sí |
-| JOHAN STEVEN RODRIGUEZ CHARRY | CC | 1075794019 | 3145555 | Johan-RC | | Yes / Sí |
-| CRISTIAN JAVIER PALMA SOTTO | CC | 1141115893 | 3145555 | CristianJPalma | | Yes / Sí |
-| BRAYAN ALBERTO PERDOMO PERDOMO | CC | 1075235870 | 3145555 | Brayanperdomoo | | Yes / Sí |
+| JUAN CARLOS JURADO CASTAÑEDA | CC | 1077224670 | 3145555 | JuanCarlosJC-20 | Desarrollador Full Stack | Yes / Sí |
+| JOHAN STEVEN RODRIGUEZ CHARRY | CC | 1075794019 | 3145555 | Johan-RC | Desarrollador Frontend | Yes / Sí |
+| CRISTIAN JAVIER PALMA SOTTO | CC | 1141115893 | 3145555 | CristianJPalma | Desarrollador Full Stack | Yes / Sí |
+| BRAYAN ALBERTO PERDOMO PERDOMO | CC | 1075235870 | 3145555 | Brayanperdomoo | Desarrollador Frontend | Yes / Sí |

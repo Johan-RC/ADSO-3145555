@@ -4,7 +4,7 @@
 
 ## Required content / Contenido requerido
 
-- [x] Graphical interfaces: mockups or prototype / Interfaces gráficas: mockups o prototipo — [Figma SomnGuard](https://www.figma.com/design/DRxeTn6XLorEBquwTviLUO/SomnGuard?node-id=0-1) (editable source / fuente editable)
+- [x] Graphical interfaces: mockups or prototype / Interfaces gráficas: mockups o prototipo — [Figma SomnGuard](https://www.figma.com/design/DRxeTn6XLorEBquwTviLUO/SomnGuard?node-id=0-1) (editable online prototype / prototipo editable en línea) and [SomnGuard.fig](./SomnGuard.fig) (exported editable file / archivo editable exportado)
 - [x] Architectural model / Modelo arquitectónico
 - [x] Design patterns applied, with where they are used / Patrones de diseño aplicados, indicando dónde se usan
 - [x] Data model: conceptual, logical and physical / Modelo de datos: conceptual, lógico y físico — ER and relational sources plus a read-only physical PostgreSQL snapshot / fuentes ER y relacional más snapshot físico de PostgreSQL en modo lectura
